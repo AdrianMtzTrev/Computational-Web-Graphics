@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOID STATION</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       MENÚ PRINCIPAL
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-menu" class="screen active">
+    <div class="stars-bg"></div>
+    <div class="scanlines"></div>
+    <div class="menu-content">
+      <div class="logo-container">
+        <h1 class="game-title glitch" data-text="VOID STATION">VOID STATION</h1>
+        <p class="game-subtitle">SURVIVAL · HORROR · SCI-FI</p>
+      </div>
+      <nav class="main-nav">
+        <button class="btn btn-primary" id="btn-play">▶ JUGAR</button>
+        <button class="btn btn-secondary" id="btn-config">⚙ CONFIGURACIÓN</button>
+        <button class="btn btn-secondary" id="btn-scores">★ PUNTUACIONES</button>
+      </nav>
+      <footer class="menu-footer">
+        <span>v1.0.0</span>
+        <span>© 2026 VOID STATION</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CONFIGURACIÓN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-config" class="screen">
+    <div class="scanlines"></div>
+    <div class="config-content panel">
+      <h2 class="panel-title">⚙ CONFIGURACIÓN</h2>
+
+      <div class="config-section">
+        <h3 class="section-title">AUDIO</h3>
+        <div class="config-row">
+          <label for="volume-master">Volumen General</label>
+          <div class="slider-wrap">
+            <input type="range" id="volume-master" min="0" max="100" value="70" class="slider">
+            <span class="slider-value" id="volume-master-val">70</span>
+          </div>
+        </div>
+        <div class="config-row">
+          <label for="volume-music">Música</label>
+          <div class="slider-wrap">
+            <input type="range" id="volume-music" min="0" max="100" value="50" class="slider">
+            <span class="slider-value" id="volume-music-val">50</span>
+          </div>
+        </div>
+        <div class="config-row">
+          <label for="volume-sfx">Efectos de Sonido</label>
+          <div class="slider-wrap">
+            <input type="range" id="volume-sfx" min="0" max="100" value="80" class="slider">
+            <span class="slider-value" id="volume-sfx-val">80</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <h3 class="section-title">DIFICULTAD</h3>
+        <div class="difficulty-selector">
+          <button class="diff-btn" data-diff="easy">FÁCIL</button>
+          <button class="diff-btn active" data-diff="normal">NORMAL</button>
+          <button class="diff-btn" data-diff="hard">DIFÍCIL</button>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <h3 class="section-title">CONTROLES</h3>
+        <table class="controls-table">
+          <thead>
+            <tr><th>Acción</th><th>Tecla</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Mover</td><td><kbd>W A S D</kbd></td></tr>
+            <tr><td>Mirar</td><td><kbd>MOUSE</kbd></td></tr>
+            <tr><td>Interactuar</td><td><kbd>E</kbd></td></tr>
+            <tr><td>Correr</td><td><kbd>SHIFT</kbd></td></tr>
+            <tr><td>Agacharse</td><td><kbd>CTRL</kbd></td></tr>
+            <tr><td>Pausa</td><td><kbd>ESC</kbd></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-back" id="btn-config-back">← VOLVER</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PUNTUACIONES
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-scores" class="screen">
+    <div class="scanlines"></div>
+    <div class="scores-content panel">
+      <h2 class="panel-title">★ PUNTUACIONES GLOBALES</h2>
+      <table class="scores-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>NOMBRE</th>
+            <th>PUNTUACIÓN</th>
+            <th>TIEMPO</th>
+          </tr>
+        </thead>
+        <tbody id="scores-body">
+          <tr class="score-gold"><td>01</td><td>ALPHA_7</td><td>98,420</td><td>12:34</td></tr>
+          <tr><td>02</td><td>VOID_HUNTER</td><td>87,300</td><td>14:21</td></tr>
+          <tr><td>03</td><td>XENO_KILL3R</td><td>75,850</td><td>15:07</td></tr>
+          <tr><td>04</td><td>STATION_X</td><td>64,200</td><td>17:43</td></tr>
+          <tr><td>05</td><td>DR_WEYLAND</td><td>58,900</td><td>18:55</td></tr>
+          <tr><td>06</td><td>RIPLEY_2077</td><td>52,100</td><td>20:12</td></tr>
+          <tr><td>07</td><td>ZERO_SUIT</td><td>44,750</td><td>22:30</td></tr>
+          <tr><td>08</td><td>GHOST_UNIT</td><td>38,400</td><td>24:18</td></tr>
+          <tr><td>09</td><td>NOVA_PRIME</td><td>31,200</td><td>27:05</td></tr>
+          <tr><td>10</td><td>LAST_HUMAN</td><td>22,500</td><td>31:47</td></tr>
+        </tbody>
+      </table>
+      <button class="btn btn-back" id="btn-scores-back">← VOLVER</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       JUEGO (Three.js canvas + HUD)
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-game" class="screen">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+      <div class="hud-left">
+        <div class="hud-bar-group">
+          <span class="hud-label">VIDA</span>
+          <div class="hud-bar">
+            <div class="hud-bar-fill health-bar" id="health-bar" style="width:85%"></div>
+          </div>
+          <span class="hud-value" id="health-val">85</span>
+        </div>
+        <div class="hud-bar-group">
+          <span class="hud-label">O₂</span>
+          <div class="hud-bar">
+            <div class="hud-bar-fill oxygen-bar" id="oxygen-bar" style="width:62%"></div>
+          </div>
+          <span class="hud-value" id="oxygen-val">62</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div id="hud-crosshair">+</div>
+        <div id="hud-interact-hint" class="hidden">[E] INTERACTUAR</div>
+      </div>
+
+      <div class="hud-right">
+        <div class="hud-items">
+          <div class="hud-item active" title="Linterna">🔦</div>
+          <div class="hud-item" title="Botiquín">💊</div>
+          <div class="hud-item" title="Oxígeno">🫁</div>
+        </div>
+        <div class="hud-minimap" id="minimap">
+          <span class="minimap-label">MAPA</span>
+          <div class="minimap-dot player-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Click-to-lock overlay -->
+    <div id="pointer-lock-overlay">
+      <div class="lock-message">
+        <h2>VOID STATION</h2>
+        <p>Haz clic para capturar el cursor</p>
+        <p class="lock-hint">ESC → Pausa</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       MENÚ DE PAUSA
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-pause" class="screen">
+    <div class="pause-overlay">
+      <div class="pause-panel">
+        <h2 class="pause-title">— PAUSA —</h2>
+        <button class="btn btn-primary" id="btn-resume">▶ CONTINUAR</button>
+        <button class="btn btn-secondary" id="btn-restart">↺ REINICIAR</button>
+        <button class="btn btn-danger" id="btn-exit-to-menu">⏏ SALIR AL MENÚ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
