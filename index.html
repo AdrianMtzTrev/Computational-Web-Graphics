@@ -11,32 +11,23 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════
-       MENÚ PRINCIPAL
-  ═══════════════════════════════════════════════ -->
+  <!-- Menu incio -->
   <div id="screen-menu" class="screen active">
     <div class="stars-bg"></div>
     <div class="scanlines"></div>
     <div class="menu-content">
       <div class="logo-container">
-        <h1 class="game-title glitch" data-text="VOID STATION">VOID STATION</h1>
-        <p class="game-subtitle">SURVIVAL · HORROR · SCI-FI</p>
+        <h1 class="game-title">VOID STATION</h1>
       </div>
       <nav class="main-nav">
         <button class="btn btn-primary" id="btn-play">▶ JUGAR</button>
         <button class="btn btn-secondary" id="btn-config">⚙ CONFIGURACIÓN</button>
         <button class="btn btn-secondary" id="btn-scores">★ PUNTUACIONES</button>
       </nav>
-      <footer class="menu-footer">
-        <span>v1.0.0</span>
-        <span>© 2026 VOID STATION</span>
-      </footer>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       CONFIGURACIÓN
-  ═══════════════════════════════════════════════ -->
+  <!-- Config -->
   <div id="screen-config" class="screen">
     <div class="scanlines"></div>
     <div class="config-content panel">
@@ -97,9 +88,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       PUNTUACIONES
-  ═══════════════════════════════════════════════ -->
+  <!-- Tabla de puntuaciones -->
   <div id="screen-scores" class="screen">
     <div class="scanlines"></div>
     <div class="scores-content panel">
@@ -130,76 +119,26 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       JUEGO (Three.js canvas + HUD)
-  ═══════════════════════════════════════════════ -->
+  <!-- El juego -->
   <div id="screen-game" class="screen">
-    <canvas id="game-canvas"></canvas>
-
-    <!-- HUD Overlay -->
-    <div id="hud">
-      <div class="hud-left">
-        <div class="hud-bar-group">
-          <span class="hud-label">VIDA</span>
-          <div class="hud-bar">
-            <div class="hud-bar-fill health-bar" id="health-bar" style="width:85%"></div>
-          </div>
-          <span class="hud-value" id="health-val">85</span>
-        </div>
-        <div class="hud-bar-group">
-          <span class="hud-label">O₂</span>
-          <div class="hud-bar">
-            <div class="hud-bar-fill oxygen-bar" id="oxygen-bar" style="width:62%"></div>
-          </div>
-          <span class="hud-value" id="oxygen-val">62</span>
-        </div>
-      </div>
-
-      <div class="hud-center">
-        <div id="hud-crosshair">+</div>
-        <div id="hud-interact-hint" class="hidden">[E] INTERACTUAR</div>
-      </div>
-
-      <div class="hud-right">
-        <div class="hud-items">
-          <div class="hud-item active" title="Linterna">🔦</div>
-          <div class="hud-item" title="Botiquín">💊</div>
-          <div class="hud-item" title="Oxígeno">🫁</div>
-        </div>
-        <div class="hud-minimap" id="minimap">
-          <span class="minimap-label">MAPA</span>
-          <div class="minimap-dot player-dot"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Click-to-lock overlay -->
-    <div id="pointer-lock-overlay">
-      <div class="lock-message">
-        <h2>VOID STATION</h2>
-        <p>Haz clic para capturar el cursor</p>
-        <p class="lock-hint">ESC → Pausa</p>
-      </div>
+    <div class="game-placeholder">
+      <h1 class="game-title-static">VOID STATION</h1>
+      <p class="game-coming-soon">— EN DESARROLLO —</p>
+      <p class="game-esc-hint">Presiona ESC para pausar</p>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       MENÚ DE PAUSA
-  ═══════════════════════════════════════════════ -->
+  <!-- MEenu pausa -->
   <div id="screen-pause" class="screen">
     <div class="pause-overlay">
       <div class="pause-panel">
         <h2 class="pause-title">— PAUSA —</h2>
         <button class="btn btn-primary" id="btn-resume">▶ CONTINUAR</button>
-        <button class="btn btn-secondary" id="btn-restart">↺ REINICIAR</button>
-        <button class="btn btn-danger" id="btn-exit-to-menu">⏏ SALIR AL MENÚ</button>
+        <button class="btn btn-secondary" id="btn-restart">REINICIAR</button>
+        <button class="btn btn-danger" id="btn-exit-to-menu">SALIR AL MENÚ</button>
       </div>
     </div>
   </div>
-
-  <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/game.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
