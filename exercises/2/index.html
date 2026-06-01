@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+        form {
+            background: #16213e;
+            padding: 30px;
+            border-radius: 12px;
+            width: 350px;
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 6px;
+            border: none;
+            box-sizing: border-box;
+        }
+        input[type="radio"] {
+            margin-top: 8px;
+        }
+        .error {
+            color: #ff6b6b;
+            font-size: 13px;
+            display: none;
+            margin-top: 4px;
+        }
+        input[type="submit"] {
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: #0f3460;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+        }
+        input[type="submit"]:hover {
+            background: #1a5276;
+        }
+        ul {
+            margin-top: 20px;
+            background: #16213e;
+            padding: 15px;
+            border-radius: 12px;
+            width: 350px;
+            list-style: none;
+            box-sizing: border-box;
+        }
+        ul li {
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+        }
+        ul li:last-child {
+            border-bottom: none;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <form id="idForm">
+        <label for="txtDato">Dato</label>
+        <input type="text" id="txtDato" name="txtDato">
+        <div class="error" id="errorMsg">El campo no puede estar vacío</div>
+
+        <label>Almacenar en:</label>
+        <input type="radio" name="storageType" value="localStorage" id="radioLocal" checked>
+        <label for="radioLocal" style="display:inline">localStorage</label>
+
+        <input type="radio" name="storageType" value="sessionStorage" id="radioSession">
+        <label for="radioSession" style="display:inline">sessionStorage</label>
+
+        <input type="submit" value="Guardar">
+    </form>
+
+    <h2>Lista de datos</h2>
+    <ul id="idLista"></ul>
+
+    <script>
+        const form = document.getElementById('idForm')
+        const txtDato = document.getElementById('txtDato')
+        const lista = document.getElementById('idLista')
+        const errorMsg = document.getElementById('errorMsg')
+        const radioLocal = document.getElementById('radioLocal')
+        const radioSession = document.getElementById('radioSession')
+
+        function cargarLista() {
+            const storage = radioLocal.checked ? localStorage : sessionStorage
+            const key = 'datos'
+            const datos = JSON.parse(storage.getItem(key)) || []
+            lista.replaceChildren()
+            datos.forEach(d => {
+                const li = document.createElement('li')
+                li.textContent = d
+                lista.appendChild(li)
+            })
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault()
+            const valor = txtDato.value.trim()
+            if (valor === '') {
+                errorMsg.style.display = 'block'
+                return
+            }
+            errorMsg.style.display = 'none'
+
+            const storage = radioLocal.checked ? localStorage : sessionStorage
+            const key = 'datos'
+            const datos = JSON.parse(storage.getItem(key)) || []
+            datos.push(valor)
+            storage.setItem(key, JSON.stringify(datos))
+            txtDato.value = ''
+            cargarLista()
+        })
+
+        document.querySelectorAll('input[name="storageType"]').forEach(r => {
+            r.addEventListener('change', cargarLista)
+        })
+
+        cargarLista()
+    </script>
+</body>
+</html>

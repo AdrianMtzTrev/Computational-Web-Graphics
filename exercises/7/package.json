@@ -1,0 +1,12 @@
+{
+  "name": "ejercicio-7",
+  "version": "1.0.0",
+  "description": "Socket.io - replicar posición de objetos en escena Three.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "socket.io": "^4.7.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "ejercicio-3",
+  "version": "1.0.0",
+  "description": "Ejercicio 3 - Servidor Express",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/styles.css">
+    <link rel="stylesheet" href="public/estilos/estilos.css">
+</head>
+
+<body>
+    
+    <h1>Semana 3</h1>
+
+    <style>
+
+    </style>
+
+    <div id="divLogin">
+        <form id="idForm" action="home.html" method="post" style="background-color: black;">
+            <label for="txtDato">Dato</label>
+            <input type="text" name="txtDato" id="txtDato">
+            <label for="idLocalStorage">Local Storage</label>
+            <input type="radio" name="idLocalStorage" id="idLocalStorage" class="grupo-radio">
+            <label for="idSessionStorage">Session Storage</label>
+            <input type="radio" name="idSessionStorage" id="idSessionStorage" class="grupo-radio">
+            <input type="submit" value="Guardar">
+        </form>
+    </div>
+
+        <ul id="idLista">
+            
+        </ul>
+
+          <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+    </fb:login-button>
+
+    <script src="public/agregar.js"></script>
+    <script>
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '463450690038999',
+                cookie: true,
+                xfbml: true,
+                version: 'v22.0'
+            });
+
+            FB.AppEvents.logPageView();
+
+        };
+
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) { return; }
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+
+
+        function checkLoginState() {
+            FB.api('/me', { fields: 'name' },function (response) {
+                alert(JSON.stringify(response));
+            
+                var nombre = sessionStorage.getItem("nombre");
+                sessionStorage.setItem("nombre",response.name);
+                localStorage.setItem("id",response.id);
+
+                statusChangeCallback(response);
+            });
+        }
+    </script>
+</body>
+
+</html>

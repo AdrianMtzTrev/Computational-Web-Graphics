@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 6 - Cargar OBJ con texturas</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Cargando modelo...</div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three'
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+        import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+        import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
+
+        const scene = new THREE.Scene()
+        scene.background = new THREE.Color(0x333344)
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
+        camera.position.set(5, 3, 5)
+        camera.lookAt(0, 0, 0)
+
+        const renderer = new THREE.WebGLRenderer()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.shadowMap.enabled = true
+        document.body.appendChild(renderer.domElement)
+
+        new OrbitControls(camera, renderer.domElement)
+
+        const ambientLight = new THREE.AmbientLight(0x404060)
+        scene.add(ambientLight)
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1)
+        dirLight.position.set(5, 10, 5)
+        dirLight.castShadow = true
+        scene.add(dirLight)
+
+        const grid = new THREE.GridHelper(10, 10)
+        scene.add(grid)
+
+        const info = document.getElementById('info')
+
+        const mtlLoader = new MTLLoader()
+        mtlLoader.load('models/apple.mtl', (materials) => {
+            materials.preload()
+            const objLoader = new OBJLoader()
+            objLoader.setMaterials(materials)
+            objLoader.load('models/apple.obj', (object) => {
+                object.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true
+                        child.receiveShadow = true
+                    }
+                })
+                object.position.set(0, 0, 0)
+                scene.add(object)
+                info.textContent = 'Modelo cargado exitosamente'
+            }, undefined, (err) => {
+                info.textContent = 'Error al cargar modelo.'
+                console.error(err)
+            })
+        }, undefined, () => {
+            const objLoader = new OBJLoader()
+            objLoader.load('models/apple.obj', (object) => {
+                object.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true
+                        child.receiveShadow = true
+                    }
+                })
+                object.position.set(0, 0, 0)
+                scene.add(object)
+                info.textContent = 'Modelo cargado (sin MTL)'
+            }, undefined, (err) => {
+                info.textContent = 'Error al cargar modelo.'
+                console.error(err)
+            })
+        })
+
+        function animate() {
+            requestAnimationFrame(animate)
+            renderer.render(scene, camera)
+        }
+
+        animate()
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight
+            camera.updateProjectionMatrix()
+            renderer.setSize(window.innerWidth, window.innerHeight)
+        })
+    </script>
+</body>
+</html>

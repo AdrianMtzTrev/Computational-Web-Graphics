@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 5 - Luces y Animación</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three'
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+
+        const scene = new THREE.Scene()
+        scene.background = new THREE.Color(0x222222)
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
+        camera.position.set(8, 6, 10)
+        camera.lookAt(0, 0, 0)
+
+        const renderer = new THREE.WebGLRenderer()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        document.body.appendChild(renderer.domElement)
+
+        new OrbitControls(camera, renderer.domElement)
+
+        const cube = new THREE.Mesh(
+            new THREE.BoxGeometry(1.5, 1.5, 1.5),
+            new THREE.MeshBasicMaterial({ color: 0xff5733 })
+        )
+        cube.position.set(-4, 0, 0)
+        scene.add(cube)
+
+        const sphereGeo = new THREE.SphereGeometry(1, 32, 32)
+        const sphereMat = new THREE.MeshPhongMaterial({ color: 0x33aaff })
+        const sphere = new THREE.Mesh(sphereGeo, sphereMat)
+        sphere.position.set(0, 0, 0)
+        scene.add(sphere)
+
+        const cylinderGeo = new THREE.CylinderGeometry(1, 1, 1.8, 32)
+        const cylinderMat = new THREE.MeshPhongMaterial({ color: 0x33ff57 })
+        const cylinder = new THREE.Mesh(cylinderGeo, cylinderMat)
+        cylinder.position.set(4, 0, -3)
+        scene.add(cylinder)
+
+        const coneGeo = new THREE.ConeGeometry(1.2, 2, 32)
+        const coneMat = new THREE.MeshPhongMaterial({ color: 0xffcc00 })
+        const cone = new THREE.Mesh(coneGeo, coneMat)
+        cone.position.set(-4, 0, 4)
+        scene.add(cone)
+
+        const ambientLight = new THREE.AmbientLight(0x404060, 0.3)
+        scene.add(ambientLight)
+
+        const directionalLight = new THREE.DirectionalLight(0xffaa44, 0.8)
+        directionalLight.position.set(5, 10, 5)
+        scene.add(directionalLight)
+
+        const pointLight = new THREE.PointLight(0xff44aa, 2, 15)
+        pointLight.position.set(0, 2, 0)
+        scene.add(pointLight)
+
+        const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.3)
+        scene.add(pointLightHelper)
+
+        function animate() {
+            requestAnimationFrame(animate)
+
+            const t = Date.now() * 0.002
+            sphere.position.x = Math.sin(t) * 3
+            pointLight.position.x = Math.sin(t) * 3
+
+            cube.rotation.x += 0.01
+            cube.rotation.y += 0.01
+            sphere.rotation.y += 0.01
+            cylinder.rotation.y += 0.01
+            cone.rotation.y += 0.01
+
+            renderer.render(scene, camera)
+        }
+
+        animate()
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight
+            camera.updateProjectionMatrix()
+            renderer.setSize(window.innerWidth, window.innerHeight)
+        })
+    </script>
+</body>
+</html>

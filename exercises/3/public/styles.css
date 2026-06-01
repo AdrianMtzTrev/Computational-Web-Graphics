@@ -1,0 +1,35 @@
+
+
+
+#divLogin{
+    background-color: blue;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+form{
+    background-color: red;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: 50%;
+}
+
+input{
+    display: block;
+    font-size: larger;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+label{
+    color: white;
+    font-size: medium;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}

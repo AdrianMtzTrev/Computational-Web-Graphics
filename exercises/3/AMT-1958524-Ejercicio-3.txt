@@ -1,0 +1,10 @@
+========== npm install ==========
+ up to date, audited 69 packages in 619ms  15 packages are looking for funding   run `npm fund` for details  found 0 vulnerabilities
+
+========== npm start ==========
+server running at http://localhost:3000
+
+
+========== Ctrl+C ==========
+Servidor detenido.
+
