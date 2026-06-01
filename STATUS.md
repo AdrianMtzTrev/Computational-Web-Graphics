@@ -1,7 +1,7 @@
 # VOID STATION — Estado del Proyecto
 
 ## Estado General
-🟡 **En desarrollo** — Día 1 de 8
+🟡 **En desarrollo** — Día 3 de 8
 
 ## Leyenda
 - ✅ Completado
@@ -76,12 +76,16 @@
 
 ## Ejercicios (requisito 30pts)
 
-| Ejercicio | Estado | Notas |
-|---|---|---|
-| 1. Cubo 3D con iluminación | ❌ | Three.js básico |
-| 2. Sistema solar miniatura | ❌ | Geometrías + animación |
-| 3. Colisiones con raycasting | ❌ | |
-| 4. Partículas | ❌ | |
+| # | Descripción | Estado | Archivos |
+|---|------------|--------|----------|
+| 1 | HTML nombre/matrícula/formulario | ✅ | `index.html`, `target.html` |
+| 2 | Formulario con localStorage/sessionStorage | ✅ | `index.html` |
+| 3 | Servidor Express con Node.js | ✅ | `server.js`, `index.html`, `package.json` |
+| 4 | 3 geometrías Three.js + MeshBasicMaterial | ✅ | `index.html` |
+| 5 | MeshPhongMaterial + 3 luces + animación | ✅ | `index.html` |
+| 6 | Cargar modelo OBJ con texturas | ✅ | `index.html`, `models/apple.obj/mtl` |
+| 7 | Socket.io replicar posición de objetos | ✅ | `server.js`, `package.json`, `public/index.html` |
+| 8 | PointLight al colisionar con cubo | ✅ | `index.html` |
 
 ## Progreso General
 
@@ -89,6 +93,7 @@
 |---|---|
 | Vie 29 mayo | ✅ Plan creado, documentación lista, HTML/CSS existente |
 | Sáb 30 mayo | |
+| Dom 31 mayo | ✅ Ejercicios 1-8 completados + zips generados |
 | Dom 31 mayo | |
 | Lun 1 junio | |
 | Mar 2 junio | |

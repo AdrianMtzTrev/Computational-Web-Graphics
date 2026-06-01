@@ -120,7 +120,7 @@ Computational-Web-Graphics/
 - [x] Pantalla configuraciones
 - [x] Pantalla puntuaciones
 - [x] Pantalla pausa
-- [ ] 4 ejercicios realizados en clase
+- [x] 4 ejercicios realizados en clase (1-8 completados)
 - [ ] Detección y uso de colisiones
 - [ ] Iluminación ambiental
 - [ ] Iluminación focal (point light)
