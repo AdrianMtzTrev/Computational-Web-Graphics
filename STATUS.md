@@ -26,8 +26,8 @@
 | Game loop | ✅ | requestAnimationFrame + deltaTime clock |
 | Controles (WASD + mouse) | ✅ | PointerLockControls, jump, crouch, run |
 | Colisiones | ✅ | AABB Box3 con per-axis slide — 11 cajas estáticas |
-| Sala de Máquinas | 🟡 | Kenney room + reactor + pipes + partículas + luces + items pickups + consolas interactivas — falta audio |
-| Laboratorio | ❌ | Escenario 2 |
+| Sala de Máquinas | ✅ | Kenney room + reactor + pipes + partículas + luces + items pickups + consolas interactivas + transición a laboratorio |
+| Laboratorio | 🟡 | room-small + gate-lasers + mostradores + equipo científico + 3 items pickup + terminal puzzle + luces frías + partículas vapor — falta audio |
 | Puente de Mando | ❌ | Escenario 3 |
 | Sistema de puzzles | ✅ | 2 consolas: batería → reactor, tarjeta → puerta |
 | Ítems / inventario | ✅ | 3 pickup: tarjeta, batería, kit reparación + inventario HUD |
@@ -98,6 +98,5 @@
 | Lun 1 junio | |
 | Mar 2 junio | 🟡 Core engine (Game, Player, HUD, SceneManager, EngineRoom) — pendiente colisiones reales, items, puzzles, audio |
 | Mié 3 junio | |
-| Jue 4 junio | |
-| Vie 5 junio | |
+| Jue 4 junio | ✅ Lab room implementada — room-small + gate-lasers + mobiliario GLB + items puzzle + terminal + partículas + transición |
 | Sáb 6 junio | 🎯 Entrega final |

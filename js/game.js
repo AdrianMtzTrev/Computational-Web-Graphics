@@ -4,6 +4,7 @@ import { Player } from './player.js';
 import { HUD } from './hud.js';
 import { SceneManager } from './scene-manager.js';
 import { EngineRoom } from './rooms/engine-room.js';
+import { LabRoom } from './rooms/lab.js';
 
 export class Game {
   constructor() {
@@ -22,6 +23,11 @@ export class Game {
     const container = document.getElementById('game-canvas-container');
     container.appendChild(this.renderer.domElement);
 
+    this.renderer.domElement.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.isRunning = false;
+    }, false);
+
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x000000);
     this.scene.fog = new THREE.Fog(0x050510, 6, 16);
@@ -38,6 +44,11 @@ export class Game {
 
     this.engineRoom = new EngineRoom();
     this.sceneManager.registerRoom('engine', this.engineRoom);
+
+    this.labRoom = new LabRoom();
+    this.sceneManager.registerRoom('lab', this.labRoom);
+    this.engineRoom.setTransitionCallback(() => this._transitionToLab());
+    this._isTransitioning = false;
 
     this._onResize = () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -111,6 +122,28 @@ export class Game {
     const saved = new Game();
     window.__game = saved;
     saved.start();
+  }
+
+  async _transitionToLab() {
+    if (this._isTransitioning) return;
+    this._isTransitioning = true;
+    this.isPaused = true;
+
+    document.getElementById('loading-screen').classList.add('active');
+
+    await this.sceneManager.switchTo('lab');
+
+    const room = this.sceneManager.getCurrentRoom();
+    if (room) {
+      if (room.getColliders) this.player.setColliders(room.getColliders());
+    }
+
+    this.camera.position.set(0, 1.7, 1.5);
+    this.player.feetY = 0;
+
+    document.getElementById('loading-screen').classList.remove('active');
+    this.isPaused = false;
+    this._isTransitioning = false;
   }
 
   stop() {
