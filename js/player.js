@@ -31,6 +31,8 @@ export class Player {
     this.gravity = 9.8;
     this.isOnGround = true;
 
+    this._colliderBoxes = [];
+
     this.raycaster = new THREE.Raycaster();
     this.interactDistance = 3;
     this.interactiveObjects = [];
@@ -47,6 +49,10 @@ export class Player {
 
     document.addEventListener('keydown', this._onKeyDown);
     document.addEventListener('keyup', this._onKeyUp);
+  }
+
+  setColliders(boxes) {
+    this._colliderBoxes = boxes || [];
   }
 
   setInteractiveObjects(objects) {
@@ -85,8 +91,15 @@ export class Player {
     this.velocity.y -= this.gravity * delta;
 
     const newPos = this.camera.position.clone();
-    newPos.x += this.velocity.x * delta;
-    newPos.z += this.velocity.z * delta;
+    const moveX = this.velocity.x * delta;
+    const moveZ = this.velocity.z * delta;
+
+    newPos.x += moveX;
+    if (this._collidesAt(newPos)) newPos.x -= moveX;
+
+    newPos.z += moveZ;
+    if (this._collidesAt(newPos)) newPos.z -= moveZ;
+
     this.feetY += this.velocity.y * delta;
 
     if (this.feetY < 0) {
@@ -96,9 +109,6 @@ export class Player {
     } else {
       this.isOnGround = false;
     }
-
-    newPos.x = Math.max(-7, Math.min(7, newPos.x));
-    newPos.z = Math.max(-7, Math.min(7, newPos.z));
 
     this.camera.position.x = newPos.x;
     this.camera.position.z = newPos.z;
@@ -137,6 +147,19 @@ export class Player {
       return obj || null;
     }
     return null;
+  }
+
+  _collidesAt(pos) {
+    if (this._colliderBoxes.length === 0) return false;
+    const halfW = 0.25;
+    const box = new THREE.Box3(
+      new THREE.Vector3(pos.x - halfW, this.feetY, pos.z - halfW),
+      new THREE.Vector3(pos.x + halfW, this.feetY + this.currentEyeHeight, pos.z + halfW)
+    );
+    for (const cb of this._colliderBoxes) {
+      if (box.intersectsBox(cb)) return true;
+    }
+    return false;
   }
 
   addItem(item) {

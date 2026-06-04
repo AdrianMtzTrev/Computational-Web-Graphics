@@ -67,6 +67,11 @@ export class Game {
 
     await this.sceneManager.switchTo('engine');
 
+    const room = this.sceneManager.getCurrentRoom();
+    if (room && room.getColliders) {
+      this.player.setColliders(room.getColliders());
+    }
+
     document.getElementById('loading-screen').classList.remove('active');
 
     this.controls.lock();

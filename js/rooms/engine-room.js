@@ -56,7 +56,7 @@ export class EngineRoom {
     this._buildPipes(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
-    this._setupWalls(scene);
+    this._setupColliders();
 
     if (window.__game && window.__game.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
@@ -269,19 +269,27 @@ export class EngineRoom {
     this.objects.push(this.particles);
   }
 
-  _setupWalls(scene) {
-    this._addCollider(0, 1.4, -3.2, 6.4, 2.8, 0.2);
-    this._addCollider(0, 1.4, 3.2, 6.4, 2.8, 0.2);
-    this._addCollider(-3.2, 1.4, 0, 0.2, 2.8, 6.4);
-    this._addCollider(3.2, 1.4, 0, 0.2, 2.8, 6.4);
+  _setupColliders() {
+    this._colliderBoxes = [
+      new THREE.Box3(new THREE.Vector3(-3.2, 0, 3.0), new THREE.Vector3(3.2, 3.0, 3.4)),
+      new THREE.Box3(new THREE.Vector3(-3.2, 0, -3.4), new THREE.Vector3(-0.6, 3.0, -3.0)),
+      new THREE.Box3(new THREE.Vector3(0.6, 0, -3.4), new THREE.Vector3(3.2, 3.0, -3.0)),
+      new THREE.Box3(new THREE.Vector3(-3.4, 0, -3.2), new THREE.Vector3(-3.0, 3.0, 3.2)),
+      new THREE.Box3(new THREE.Vector3(3.0, 0, -3.2), new THREE.Vector3(3.4, 3.0, 3.2)),
+
+      new THREE.Box3(new THREE.Vector3(-1.2, 0, -5.5), new THREE.Vector3(-0.6, 3.0, -3.0)),
+      new THREE.Box3(new THREE.Vector3(0.6, 0, -5.5), new THREE.Vector3(1.2, 3.0, -3.0)),
+      new THREE.Box3(new THREE.Vector3(-1.2, 0, -5.7), new THREE.Vector3(1.2, 3.0, -5.5)),
+
+      new THREE.Box3(new THREE.Vector3(-1.5, 0, -1.0), new THREE.Vector3(1.5, 3.0, 2.0)),
+
+      new THREE.Box3(new THREE.Vector3(2.6, 0, 1.6), new THREE.Vector3(3.4, 0.7, 2.4)),
+      new THREE.Box3(new THREE.Vector3(-3.2, 0, -2.4), new THREE.Vector3(-2.4, 0.7, -1.6)),
+    ];
   }
 
-  _addCollider(x, y, z, sx, sy, sz) {
-    const mat = new THREE.MeshBasicMaterial({ visible: false });
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
-    mesh.position.set(x, y, z);
-    this.scene.add(mesh);
-    this.objects.push(mesh);
+  getColliders() {
+    return this._colliderBoxes;
   }
 
   update(delta, time) {
