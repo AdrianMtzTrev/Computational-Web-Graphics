@@ -100,19 +100,22 @@ Computational-Web-Graphics/
     └── schema.sql           ← CREATE TABLEs (scores, usuarios, salas)
 ```
 
-## Cronograma (8 días)
+## Estrategia
 
-| Día | Tema | Conceptos Three.js |
+Primero pulir Sala de Máquinas hasta dejarla funcional (colisiones reales, ítems, puzzles, audio),
+luego replicar el patrón en Laboratorio y Puente de Mando. Esto evita acumular deuda técnica.
+
+## Cronograma (actualizado)
+
+| Día | Tema | Qué incluye |
 |---|---|---|
-| **Vie 29** | Fundamentals | Scene, Camera, Renderer, Mesh, materiales básicos, animación loop |
-| **Sáb 30** | Modelos 3D | GLTFLoader, cargar piezas Kenney, posicionamiento, escena |
-| **Dom 31** | Controles + Colisiones | PointerLockControls, WASD, Raycaster, triggers |
-| **Lun 1** | Sala de Máquinas | Escenario 1: modelos, ambient + point light, oscuridad |
-| **Mar 2** | Laboratorio + Puente | Escenarios 2 y 3, texturas, atmósferas distintas |
-| **Mié 3** | Puzzles + Ítems | Interacción con objetos, inventory, terminales con código |
-| **Jue 4** | IA + Partículas + Sonido | Enemigos patrulla/persecución, PointsMaterial, PositionalAudio |
-| **Vie 5** | Backend + Multiplayer | Express, Socket.io rooms, MySQL + knex.js, API REST |
-| **Sáb 6** | Deploy + Pruebas | GitHub Pages, Railway, Railway MySQL plugin, ajustes finales, probar en Chrome |
+| **Dom 31** ✅ | Ejercicios 1-8 | 8 ejercicios completados + zips |
+| **Lun 1** | Preparación | PLAN.md, STATUS.md, HTML/CSS fronts, assets descargados |
+| **Mar 2** 🟡 | Core Engine + Sala Máquinas V1 | game.js, player.js, HUD, scene-manager, engine-room con Kenney + reactor + partículas + luces parpadeantes |
+| **Mar 2** (cont.) | Pulir Sala Máquinas | Colisiones Raycaster reales, 3+ ítems (tarjeta, batería, kit), sistema de puzzles base, interacción con consolas, audio ambiente |
+| **Mié 3** | Lab + Bridge + Modos | Escenarios 2 y 3 (reusando patrón de engine-room), modo Historia + Contrarreloj, 2 dificultades |
+| **Jue 4** | IA + Partículas + Multiplayer | Drones patrulla/persecución, mejora de partículas, Socket.io multijugador |
+| **Vie 5** | Backend + Deploy + Redes | Express + MySQL, API REST, LocalStorage, GitHub Pages, Railway, botón redes sociales |
 
 ## Checklist de Requisitos (Rúbrica)
 
@@ -120,10 +123,11 @@ Computational-Web-Graphics/
 - [x] Pantalla configuraciones
 - [x] Pantalla puntuaciones
 - [x] Pantalla pausa
+- [x] Pantalla de juego (canvas Three.js + loading screen)
 - [x] 4 ejercicios realizados en clase (1-8 completados)
 - [ ] Detección y uso de colisiones
-- [ ] Iluminación ambiental
-- [ ] Iluminación focal (point light)
+- [x] Iluminación ambiental (AmbientLight en Sala Máquinas)
+- [x] Iluminación focal (PointLights parpadeantes en Sala Máquinas)
 - [ ] 2 niveles de dificultad (no basados en tiempo)
 - [ ] 3 escenarios totalmente distintos
 - [ ] 2 modos de juego distintos
@@ -132,8 +136,8 @@ Computational-Web-Graphics/
 - [ ] Efectos de sonido y música de fondo
 - [ ] 3+ ítems especiales
 - [ ] Multijugador en tiempo real
-- [ ] Partículas
+- [x] Partículas (PointsMaterial — vapor en Sala Máquinas)
 - [ ] IA (seguimiento de enemigos al personaje)
-- [ ] Modelos con texturas y animaciones (GLTF)
+- [x] Modelos con texturas y animaciones (GLTF — Kenney Modular Space Kit)
 - [ ] Almacenamiento local (LocalStorage)
 - [ ] Almacenamiento remoto (MySQL)

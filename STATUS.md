@@ -1,7 +1,7 @@
 # VOID STATION — Estado del Proyecto
 
 ## Estado General
-🟡 **En desarrollo** — Día 3 de 8 (Mar 2 junio)
+🟡 **En desarrollo** — Mar 2 junio (plan ajustado: pulir Sala Máquinas antes de expandir)
 
 ## Leyenda
 - ✅ Completado
@@ -25,8 +25,8 @@
 | Inicialización Three.js | ✅ | Scene, Camera, WebGLRenderer, ToneMapping |
 | Game loop | ✅ | requestAnimationFrame + deltaTime clock |
 | Controles (WASD + mouse) | ✅ | PointerLockControls, jump, crouch, run |
-| Colisiones | 🟡 | Invisible bounding box walls (engine room) |
-| Sala de Máquinas | 🟡 | Kenney room-large + cables + reactor (geometrías) + pipes |
+| Colisiones | 🟡 | Bounding box walls — falta Raycaster contra meshes reales |
+| Sala de Máquinas | 🟡 | Kenney room-large + cables + reactor + pipes + partículas + luces — falta items interactivos + audio |
 | Laboratorio | ❌ | Escenario 2 |
 | Puente de Mando | ❌ | Escenario 3 |
 | Sistema de puzzles | ❌ | Objetos + terminales con código |
@@ -96,7 +96,7 @@
 | Dom 31 mayo | ✅ Ejercicios 1-8 completados + zips generados |
 | Dom 31 mayo | |
 | Lun 1 junio | |
-| Mar 2 junio | 🟡 Core engine (Game, Player, HUD, SceneManager, EngineRoom) |
+| Mar 2 junio | 🟡 Core engine (Game, Player, HUD, SceneManager, EngineRoom) — pendiente colisiones reales, items, puzzles, audio |
 | Mié 3 junio | |
 | Jue 4 junio | |
 | Vie 5 junio | |
