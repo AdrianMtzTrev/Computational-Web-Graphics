@@ -27,7 +27,7 @@ export class Game {
     this.scene.fog = new THREE.Fog(0x050510, 6, 16);
 
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-    this.camera.position.set(0, 1.7, -2.8);
+    this.camera.position.set(2.0, 1.7, 5);
     this.camera.lookAt(0, 1, 0);
 
     this.controls = new PointerLockControls(this.camera, this.renderer.domElement);
