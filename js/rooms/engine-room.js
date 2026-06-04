@@ -407,14 +407,14 @@ export class EngineRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0x445566, 2.5);
+    const ambient = new THREE.AmbientLight(0x111122, 0.5);
     scene.add(ambient);
     this.lights.push(ambient);
 
     for (let i = 0; i < 4; i++) {
       const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
       const r = 3.0;
-      const emLight = new THREE.PointLight(0xff0000, 2.5, 15);
+      const emLight = new THREE.PointLight(0xff0000, 0.4, 15);
       emLight.position.set(Math.cos(angle) * r, 1.6, Math.sin(angle) * r);
       scene.add(emLight);
       this.flickerLights.push({
@@ -426,15 +426,8 @@ export class EngineRoom {
       this.lights.push(emLight);
     }
 
-    const dimCeiling = new THREE.PointLight(0xffffff, 2.5, 20);
+    const dimCeiling = new THREE.PointLight(0xffffff, 0.15, 20);
     dimCeiling.position.set(0, 2.2, 0);
-
-    const dirLight = new THREE.DirectionalLight(0xaaccff, 1.5);
-    dirLight.position.set(5, 8, 5);
-    dirLight.target.position.set(0, 0, 0);
-    scene.add(dirLight.target);
-    scene.add(dirLight);
-    this.lights.push(dirLight, dirLight.target);
     scene.add(dimCeiling);
     this.flickerLights.push({
       light: dimCeiling,
@@ -507,7 +500,8 @@ export class EngineRoom {
 
   update(delta, time) {
     this.flickerLights.forEach(f => {
-      f.light.intensity = f.baseIntensity;
+      const flicker = Math.sin(time * f.speed) * f.amplitude;
+      f.light.intensity = Math.max(0.05, f.baseIntensity + flicker);
     });
 
     this._pickupItems.forEach(entry => {

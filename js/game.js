@@ -17,17 +17,17 @@ export class Game {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.toneMappingExposure = 0.9;
 
     const container = document.getElementById('game-canvas-container');
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x000000);
-    this.scene.fog = new THREE.Fog(0x050510, 20, 50);
+    this.scene.fog = new THREE.Fog(0x050510, 6, 16);
 
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-    this.camera.position.set(2.0, 1.7, 5);
+    this.camera.position.set(0, 1.7, -1.5);
     this.camera.lookAt(0, 1, 0);
 
     this.controls = new PointerLockControls(this.camera, this.renderer.domElement);
