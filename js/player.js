@@ -78,7 +78,7 @@ export class Player {
     if (this.keys['KeyD'] || this.keys['ArrowRight']) moveDir.add(right);
 
     this.isRunning = !!(this.keys['ShiftLeft'] || this.keys['ShiftRight']);
-    this.isCrouching = !!(this.keys['ControlLeft'] || this.keys['ControlRight']);
+    this.isCrouching = !!(this.keys['AltLeft']);
 
     if (moveDir.lengthSq() > 0) moveDir.normalize();
 

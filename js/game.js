@@ -63,12 +63,7 @@ export class Game {
     };
     document.addEventListener('keydown', this._onCaptureKeyDown, { capture: true });
 
-    window.addEventListener('beforeunload', (e) => {
-      if (this.controls && this.controls.isLocked) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    });
+
 
     this.controls.addEventListener('unlock', () => {
       if (this.isRunning && !this.isPaused) {
