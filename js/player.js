@@ -39,9 +39,10 @@ export class Player {
 
     this.keys = {};
     this._onKeyDown = (e) => {
+      if (this.controls.isLocked) e.preventDefault();
       this.keys[e.code] = true;
       if (e.code === 'KeyE') this._tryInteract();
-      if (e.code === 'Space') { e.preventDefault(); this._jump(); }
+      if (e.code === 'Space') this._jump();
     };
     this._onKeyUp = (e) => {
       this.keys[e.code] = false;
