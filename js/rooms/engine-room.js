@@ -12,6 +12,8 @@ export class EngineRoom {
     this.gateDoor = null;
     this.gateOpen = false;
     this.gateAnimT = 0;
+    this._transitionCallback = null;
+    this._transitionTriggered = false;
     this._pickupItems = [];
     this._consoleGroups = [];
     this._consoleScreens = [];
@@ -81,6 +83,10 @@ export class EngineRoom {
     return new Promise((resolve, reject) => {
       this.loader.load(name, gltf => resolve(gltf.scene), undefined, reject);
     });
+  }
+
+  setTransitionCallback(cb) {
+    this._transitionCallback = cb;
   }
 
   _buildReactor(scene) {
@@ -520,6 +526,14 @@ export class EngineRoom {
       }
     }
 
+    if (this._transitionCallback && this.gateOpen && !this._transitionTriggered && window.__game?.player) {
+      const pPos = window.__game.player.camera.position;
+      if (pPos.z < -5.0) {
+        this._transitionTriggered = true;
+        this._transitionCallback();
+      }
+    }
+
     if (this.particles) {
       const positions = this.particles.geometry.attributes.position.array;
       for (let i = 0; i < positions.length / 3; i++) {
@@ -566,6 +580,8 @@ export class EngineRoom {
     this.gateDoor = null;
     this.gateOpen = false;
     this.gateAnimT = 0;
+    this._transitionCallback = null;
+    this._transitionTriggered = false;
     this._pickupItems = [];
     this._consoleGroups = [];
     this._consoleScreens = [];
