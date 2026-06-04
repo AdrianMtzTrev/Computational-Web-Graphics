@@ -121,10 +121,15 @@
 
   <!-- El juego -->
   <div id="screen-game" class="screen">
-    <div class="game-placeholder">
-      <h1 class="game-title-static">VOID STATION</h1>
-      <p class="game-coming-soon">— EN DESARROLLO —</p>
-      <p class="game-esc-hint">Presiona ESC para pausar</p>
+    <div id="game-canvas-container"></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading-screen" class="screen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">CARGANDO</p>
+      <p class="loading-sub">SALA DE MÁQUINAS</p>
     </div>
   </div>
 
@@ -139,6 +144,14 @@
       </div>
     </div>
   </div>
-  <script src="js/main.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

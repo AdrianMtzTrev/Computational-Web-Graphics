@@ -1,3 +1,7 @@
+import { Game } from './game.js';
+
+let gameInstance = null;
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(function(s) {
     s.classList.remove('active');
@@ -5,36 +9,68 @@ function showScreen(id) {
   document.getElementById('screen-' + id).classList.add('active');
 }
 
-function startGame() {
+async function startGame() {
+  if (gameInstance) {
+    gameInstance.dispose();
+    gameInstance = null;
+  }
+  gameInstance = new Game();
+  window.__game = gameInstance;
+
   showScreen('game');
+  await gameInstance.start();
 }
 
 function pauseGame() {
+  if (gameInstance) {
+    gameInstance.pause();
+  }
+  var hud = document.getElementById('game-hud');
+  if (hud) hud.style.display = 'none';
   showScreen('pause');
 }
 
 function resumeGame() {
+  if (gameInstance) {
+    gameInstance.resume();
+  }
+  var hud = document.getElementById('game-hud');
+  if (hud) hud.style.display = '';
   showScreen('game');
 }
 
 function exitToMenu() {
+  if (gameInstance) {
+    gameInstance.dispose();
+    gameInstance = null;
+    window.__game = null;
+  }
   showScreen('menu');
 }
 
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Escape') return;
 
-  var gameActive  = document.getElementById('screen-game').classList.contains('active');
-  var pauseActive = document.getElementById('screen-pause').classList.contains('active');
+  const gameActive  = document.getElementById('screen-game').classList.contains('active');
+  const pauseActive = document.getElementById('screen-pause').classList.contains('active');
 
-  if (gameActive) {
+  if (gameActive && gameInstance && !gameInstance.controls.isLocked && !gameInstance.isPaused) {
+    return;
+  }
+
+  if (gameActive && gameInstance && gameInstance.controls.isLocked) {
     pauseGame();
   } else if (pauseActive) {
     resumeGame();
   }
 });
 
-// Sliders de volumen
+window.addEventListener('game-pause', function() {
+  if (gameInstance && gameInstance.isRunning) {
+    pauseGame();
+  }
+});
+
 var sliders = [
   { slider: 'volume-master', display: 'volume-master-val' },
   { slider: 'volume-music',  display: 'volume-music-val'  },
@@ -49,7 +85,6 @@ sliders.forEach(function(item) {
   });
 });
 
-// Selector de dificultad
 var diffBtns = document.querySelectorAll('.diff-btn');
 diffBtns.forEach(function(btn) {
   btn.addEventListener('click', function() {
@@ -58,19 +93,22 @@ diffBtns.forEach(function(btn) {
   });
 });
 
-// Botones menu principal
 document.getElementById('btn-play').addEventListener('click', startGame);
 document.getElementById('btn-config').addEventListener('click', function() { showScreen('config'); });
 document.getElementById('btn-scores').addEventListener('click', function() { showScreen('scores'); });
 
-// Botones volver
 document.getElementById('btn-config-back').addEventListener('click', function() { showScreen('menu'); });
 document.getElementById('btn-scores-back').addEventListener('click', function() { showScreen('menu'); });
 
-// Botones pausa
 document.getElementById('btn-resume').addEventListener('click', resumeGame);
-document.getElementById('btn-restart').addEventListener('click', startGame);
+document.getElementById('btn-restart').addEventListener('click', function() {
+  if (gameInstance) {
+    gameInstance.dispose();
+    gameInstance = null;
+    window.__game = null;
+  }
+  startGame();
+});
 document.getElementById('btn-exit-to-menu').addEventListener('click', exitToMenu);
 
-// Pantalla inicial
 showScreen('menu');
