@@ -1,7 +1,7 @@
 # VOID STATION — Estado del Proyecto
 
 ## Estado General
-🟡 **En desarrollo** — Día 3 de 8
+🟡 **En desarrollo** — Día 3 de 8 (Mar 2 junio)
 
 ## Leyenda
 - ✅ Completado
@@ -16,25 +16,25 @@
 | Configuración | ✅ | Sliders volumen, selector dificultad, tabla controles |
 | Puntuaciones | ✅ | Tabla con datos quemados (placeholder), conectará a BD |
 | Pausa | ✅ | Overlay con CONTINUAR/REINICIAR/SALIR |
-| Pantalla de juego | 🟡 | Placeholder "EN DESARROLLO" — se reemplazará con canvas Three.js |
+| Pantalla de juego | ✅ | Canvas Three.js + loading screen + HUD |
 
 ## Frontend — Juego (Three.js)
 
 | Componente | Estado | Notas |
 |---|---|---|
-| Inicialización Three.js | ❌ | Scene, Camera, Renderer |
-| Game loop | ❌ | requestAnimationFrame + deltaTime |
-| Controles (WASD + mouse) | ❌ | PointerLockControls |
-| Colisiones | ❌ | Raycaster / bounding boxes |
-| Sala de Máquinas | ❌ | Escenario 1 con Kenney pack |
+| Inicialización Three.js | ✅ | Scene, Camera, WebGLRenderer, ToneMapping |
+| Game loop | ✅ | requestAnimationFrame + deltaTime clock |
+| Controles (WASD + mouse) | ✅ | PointerLockControls, jump, crouch, run |
+| Colisiones | 🟡 | Invisible bounding box walls (engine room) |
+| Sala de Máquinas | 🟡 | Kenney room-large + cables + reactor (geometrías) + pipes |
 | Laboratorio | ❌ | Escenario 2 |
 | Puente de Mando | ❌ | Escenario 3 |
 | Sistema de puzzles | ❌ | Objetos + terminales con código |
-| Ítems / inventario | ❌ | 3+ objetos coleccionables |
+| Ítems / inventario | 🟡 | Sistema de inventario (Player.addItem/hasItem/removeItem) |
 | IA enemigos | ❌ | Drones patrulla + persecución |
-| Partículas | ❌ | Chispas, hologramas, humo |
+| Partículas | 🟡 | Steam/vapor con PointsMaterial (engine room) |
 | Audio | ❌ | Música + SFX |
-| HUD | ❌ | Vida, puntuación, items, tiempo |
+| HUD | ✅ | Crosshair, barra de vida, prompt interactuar, inventario, mensajes |
 | Modos de juego | ❌ | Historia + Contrarreloj |
 | Dificultad | ❌ | Fácil / Difícil |
 
@@ -62,7 +62,7 @@
 
 | Componente | Estado | Notas |
 |---|---|---|
-| Kenney Modular Space Kit | ❌ | Por descargar y colocar en assets/models/ |
+| Kenney Modular Space Kit | ✅ | Extraído a assets/models/modular-space-kit/ (40+ GLB) |
 | Texturas adicionales | ❌ | |
 | Música ambiente | ❌ | Por buscar (libre de regalías) |
 | SFX (pasos, puertas, alarmas) | ❌ | Por buscar |
@@ -96,7 +96,7 @@
 | Dom 31 mayo | ✅ Ejercicios 1-8 completados + zips generados |
 | Dom 31 mayo | |
 | Lun 1 junio | |
-| Mar 2 junio | |
+| Mar 2 junio | 🟡 Core engine (Game, Player, HUD, SceneManager, EngineRoom) |
 | Mié 3 junio | |
 | Jue 4 junio | |
 | Vie 5 junio | |
