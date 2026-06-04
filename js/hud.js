@@ -15,6 +15,7 @@ export class HUD {
       </div>
       <div id="hud-inventory"></div>
       <div id="hud-message"></div>
+      <div id="hud-flashlight">🔦</div>
     `;
 
     this.crosshair = document.getElementById('hud-crosshair');
@@ -23,6 +24,7 @@ export class HUD {
     this.interactEl = document.getElementById('hud-interact');
     this.inventoryEl = document.getElementById('hud-inventory');
     this.messageEl = document.getElementById('hud-message');
+    this.flashlightEl = document.getElementById('hud-flashlight');
 
     const style = document.createElement('style');
     style.textContent = `
@@ -108,6 +110,14 @@ export class HUD {
         letter-spacing: 0.1em;
       }
       #hud-message.visible { opacity: 1; }
+      #hud-flashlight {
+        position: absolute; bottom: 36px; right: 36px;
+        font-size: 28px;
+        filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.5));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      #hud-flashlight.on { opacity: 1; }
     `;
     document.head.appendChild(style);
   }
@@ -128,6 +138,8 @@ export class HUD {
       slot.title = item.name || item.id;
       this.inventoryEl.appendChild(slot);
     });
+
+    this.flashlightEl.className = player.flashlightOn ? 'on' : '';
   }
 
   showMessage(text, duration) {

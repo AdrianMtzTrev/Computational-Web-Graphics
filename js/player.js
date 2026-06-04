@@ -43,6 +43,7 @@ export class Player {
       this.keys[e.code] = true;
       if (e.code === 'KeyE') this._tryInteract();
       if (e.code === 'Space') this._jump();
+      if (e.code === 'KeyF') this._toggleFlashlight();
     };
     this._onKeyUp = (e) => {
       this.keys[e.code] = false;
@@ -50,6 +51,12 @@ export class Player {
 
     document.addEventListener('keydown', this._onKeyDown);
     document.addEventListener('keyup', this._onKeyUp);
+
+    this.flashlight = new THREE.SpotLight(0xeeeeff, 5.0, 20, Math.PI / 5, 0.5, 2);
+    this.flashlightTarget = new THREE.Object3D();
+    this.flashlightTarget.position.set(0, 0, -10);
+    this.flashlight.target = this.flashlightTarget;
+    this.flashlightOn = true;
   }
 
   setColliders(boxes) {
@@ -117,12 +124,29 @@ export class Player {
     this.targetEyeHeight = this.isCrouching ? this.crouchHeight : this.playerHeight;
     this.currentEyeHeight += (this.targetEyeHeight - this.currentEyeHeight) * Math.min(1, 10 * delta);
     this.camera.position.y = this.feetY + this.currentEyeHeight;
+
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+    this.flashlight.position.copy(this.camera.position);
+    this.flashlight.position.y -= 0.15;
+    this.flashlight.position.addScaledVector(dir, 0.5);
+    this.flashlight.target.position.copy(this.camera.position).addScaledVector(dir, 10);
   }
 
   _jump() {
     if (!this.isOnGround || this.isCrouching) return;
     this.velocity.y = 4.5;
     this.isOnGround = false;
+  }
+
+  _toggleFlashlight() {
+    this.flashlightOn = !this.flashlightOn;
+    this.flashlight.intensity = this.flashlightOn ? 5.0 : 0;
+    const hud = window.__game?.hud;
+    if (hud) hud.showMessage(
+      this.flashlightOn ? '🔦 Linterna encendida' : '🔦 Linterna apagada',
+      1500
+    );
   }
 
   _tryInteract() {

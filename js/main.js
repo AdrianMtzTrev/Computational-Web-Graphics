@@ -13,6 +13,8 @@ async function startGame() {
   if (gameInstance) {
     gameInstance.dispose();
     gameInstance = null;
+    window.__game = null;
+    await new Promise(r => setTimeout(r, 150));
   }
   gameInstance = new Game();
   window.__game = gameInstance;
@@ -101,14 +103,7 @@ document.getElementById('btn-config-back').addEventListener('click', function() 
 document.getElementById('btn-scores-back').addEventListener('click', function() { showScreen('menu'); });
 
 document.getElementById('btn-resume').addEventListener('click', resumeGame);
-document.getElementById('btn-restart').addEventListener('click', function() {
-  if (gameInstance) {
-    gameInstance.dispose();
-    gameInstance = null;
-    window.__game = null;
-  }
-  startGame();
-});
+document.getElementById('btn-restart').addEventListener('click', startGame);
 document.getElementById('btn-exit-to-menu').addEventListener('click', exitToMenu);
 
 showScreen('menu');

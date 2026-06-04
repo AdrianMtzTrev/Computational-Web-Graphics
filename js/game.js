@@ -90,6 +90,8 @@ export class Game {
     document.getElementById('loading-screen').classList.add('active');
 
     await this.sceneManager.switchTo('engine');
+    this.scene.add(this.player.flashlight);
+    this.scene.add(this.player.flashlightTarget);
 
     const room = this.sceneManager.getCurrentRoom();
     if (room && room.getColliders) {
@@ -132,6 +134,8 @@ export class Game {
     document.getElementById('loading-screen').classList.add('active');
 
     await this.sceneManager.switchTo('lab');
+    this.scene.add(this.player.flashlight);
+    this.scene.add(this.player.flashlightTarget);
 
     const room = this.sceneManager.getCurrentRoom();
     if (room) {
@@ -154,6 +158,14 @@ export class Game {
     window.removeEventListener('resize', this._onResize);
     this.sceneManager.dispose();
     this.engineRoom.unload(this.scene);
+    if (this.player) {
+      if (this.player.flashlight && this.player.flashlight.parent) {
+        this.player.flashlight.parent.remove(this.player.flashlight);
+      }
+      if (this.player.flashlightTarget && this.player.flashlightTarget.parent) {
+        this.player.flashlightTarget.parent.remove(this.player.flashlightTarget);
+      }
+    }
   }
 
   dispose() {
