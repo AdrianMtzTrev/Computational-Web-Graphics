@@ -54,6 +54,22 @@ export class Game {
     };
     document.addEventListener('keydown', this._onKeyDown);
 
+    this._onCaptureKeyDown = (e) => {
+      if (this.controls && this.controls.isLocked) {
+        if (e.ctrlKey && (e.code === 'KeyW' || e.code === 'KeyN' || e.code === 'KeyT')) {
+          e.preventDefault();
+        }
+      }
+    };
+    document.addEventListener('keydown', this._onCaptureKeyDown, { capture: true });
+
+    window.addEventListener('beforeunload', (e) => {
+      if (this.controls && this.controls.isLocked) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
     this.controls.addEventListener('unlock', () => {
       if (this.isRunning && !this.isPaused) {
         window.dispatchEvent(new CustomEvent('game-pause'));

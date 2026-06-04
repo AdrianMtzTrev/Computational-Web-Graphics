@@ -9,6 +9,16 @@ export class EngineRoom {
     this.interactiveObjects = [];
     this.colliders = [];
     this.particles = null;
+    this.gateDoor = null;
+    this.gateOpen = false;
+    this.gateAnimT = 0;
+    this._pickupItems = [];
+    this._consoleGroups = [];
+    this._consoleScreens = [];
+    this._puzzleStates = [
+      { id: 'power', solved: false, label: 'SISTEMA', messageOff: 'SIN ENERGÍA', messageOn: 'SISTEMA ACTIVO' },
+      { id: 'access', solved: false, label: 'ACCESO', messageOff: 'ACCESO DENEGADO', messageOn: 'PUERTA ABIERTA' },
+    ];
     this.loader = new GLTFLoader();
     this.loader.setPath('assets/models/modular-space-kit/');
     this.loader.setResourcePath('assets/models/modular-space-kit/Textures/');
@@ -38,12 +48,12 @@ export class EngineRoom {
     scene.add(cables);
     this.objects.push(cables);
 
-    const gateDoor = roomModels[2];
-    gateDoor.position.set(0, -0.5, -3.5);
-    gateDoor.rotation.y = Math.PI / 2;
-    gateDoor.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    scene.add(gateDoor);
-    this.objects.push(gateDoor);
+    this.gateDoor = roomModels[2];
+    this.gateDoor.position.set(0, -0.5, -3.5);
+    this.gateDoor.rotation.y = Math.PI / 2;
+    this.gateDoor.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    scene.add(this.gateDoor);
+    this.objects.push(this.gateDoor);
 
     const corridor = roomModels[3];
     corridor.position.set(0, -0.5, -5.5);
@@ -54,10 +64,12 @@ export class EngineRoom {
     this._buildReactor(scene);
     this._buildConsoles(scene);
     this._buildPipes(scene);
+    this._buildPickupItems(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
     this._setupColliders();
 
+    this._rebuildInteractiveObjects();
     if (window.__game && window.__game.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
     }
@@ -79,9 +91,9 @@ export class EngineRoom {
     const coreMat = new THREE.MeshPhongMaterial({
       color: 0xff4400,
       emissive: 0xff2200,
-      emissiveIntensity: 0.6,
+      emissiveIntensity: 0.3,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.4,
     });
     const core = new THREE.Mesh(coreGeo, coreMat);
     core.position.y = 0.6;
@@ -129,7 +141,7 @@ export class EngineRoom {
     scene.add(group);
     this.objects.push(group);
 
-    const reactorLight = new THREE.PointLight(0xff4400, 1.5, 10);
+    const reactorLight = new THREE.PointLight(0xff4400, 0.8, 8);
     reactorLight.position.set(0, 1.2, 0.5);
     scene.add(reactorLight);
     this.flickerLights.push({ light: reactorLight, baseIntensity: 1.5, speed: 4, amplitude: 0.6 });
@@ -142,18 +154,13 @@ export class EngineRoom {
       metalness: 0.6,
       roughness: 0.3,
     });
-    const screenMat = new THREE.MeshPhongMaterial({
-      color: 0x00ff88,
-      emissive: 0x00ff88,
-      emissiveIntensity: 0.3,
-    });
 
     const positions = [
-      { x: 3.0, z: 2.0, rot: -Math.PI / 4 },
-      { x: -2.8, z: -2.0, rot: Math.PI / 3 },
+      { x: 3.0, z: 2.0, rot: -Math.PI / 4, puzzleIdx: 0 },
+      { x: -2.8, z: -2.0, rot: Math.PI / 3, puzzleIdx: 1 },
     ];
 
-    positions.forEach(pos => {
+    positions.forEach((pos, idx) => {
       const group = new THREE.Group();
       group.position.set(pos.x, 0, pos.z);
       group.rotation.y = pos.rot;
@@ -163,18 +170,217 @@ export class EngineRoom {
       body.castShadow = true;
       group.add(body);
 
+      const screenMat = new THREE.MeshPhongMaterial({
+        color: 0x00ff88,
+        emissive: 0x00ff88,
+        emissiveIntensity: 0.3,
+      });
       const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), screenMat);
       screen.position.set(0, 0.55, -0.21);
       group.add(screen);
+      this._consoleScreens.push(screen);
 
-      const screen2 = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), screenMat);
+      const screen2 = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), screenMat.clone());
       screen2.position.set(0, 0.55, 0.21);
       screen2.rotation.y = Math.PI;
       group.add(screen2);
+      this._consoleScreens.push(screen2);
+
+      const puzzle = this._puzzleStates[pos.puzzleIdx];
+      const textMat = this._makeLabelMat(puzzle.messageOff, 0xff4444);
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.08), textMat);
+      label.position.set(0, 0.42, -0.22);
+      group.add(label);
+
+      group.userData.interact = () => this._onConsoleInteract(idx, pos.puzzleIdx, group);
+      this._consoleGroups.push(group);
 
       scene.add(group);
       this.objects.push(group);
     });
+  }
+
+  _makeLabelMat(text, color) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, 128, 32);
+    ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 64, 16);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      depthWrite: false,
+    });
+  }
+
+  _onConsoleInteract(consoleIdx, puzzleIdx, group) {
+    const puzzle = this._puzzleStates[puzzleIdx];
+    const player = window.__game?.player;
+    const hud = window.__game?.hud;
+    if (!player || !hud) return;
+
+    if (puzzle.solved) {
+      hud.showMessage(puzzle.messageOn, 2000);
+      return;
+    }
+
+    const required = puzzle.id === 'power' ? 'battery' : 'keycard';
+    const itemName = puzzle.id === 'power' ? 'Batería' : 'Tarjeta de Acceso';
+
+    if (player.hasItem(required)) {
+      player.removeItem(required);
+      puzzle.solved = true;
+      hud.showMessage(`✅ ${puzzle.label}: ${puzzle.messageOn}`, 3000);
+
+      if (puzzle.id === 'power') {
+        this._onPowerSolved();
+      } else if (puzzle.id === 'access') {
+        this._onAccessSolved();
+      }
+    } else {
+      hud.showMessage(`❌ ${puzzle.label}: NECESITAS ${itemName.toUpperCase()}`, 2500);
+    }
+  }
+
+  _onPowerSolved() {
+    const coreMat = this._findReactorCore();
+    if (coreMat) {
+      coreMat.emissiveIntensity = 1.0;
+      coreMat.opacity = 0.9;
+      coreMat.color.setHex(0xff6600);
+    }
+    const hud = window.__game?.hud;
+    if (hud) hud.showMessage('⚡ REACTOR ACTIVADO — SISTEMAS CRÍTICOS ONLINE', 4000);
+  }
+
+  _onAccessSolved() {
+    this.gateOpen = true;
+    this.gateAnimT = 0;
+    const hud = window.__game?.hud;
+    if (hud) hud.showMessage('🚪 PUERTA ABIERTA — ACCESO AL CORREDOR', 4000);
+  }
+
+  _findReactorCore() {
+    for (const obj of this.objects) {
+      let found = null;
+      obj.traverse(c => {
+        if (c.isMesh && c.material && c.material.emissive && c.material.emissive.getHex() === 0xff2200) {
+          found = c.material;
+        }
+      });
+      if (found) return found;
+    }
+    return null;
+  }
+
+  _buildPickupItems(scene) {
+    const itemDefs = [
+      { id: 'keycard', name: 'Tarjeta de Acceso', icon: '🔑', color: 0x4488ff, pos: [-2.8, 0.25, -0.8], hint: '🔑 Tarjeta de Acceso obtenida' },
+      { id: 'battery', name: 'Batería', icon: '⚡', color: 0xffaa00, pos: [1.8, 0.25, 1.2], hint: '⚡ Batería obtenida' },
+      { id: 'repair_kit', name: 'Kit de Reparación', icon: '🩹', color: 0x44ff44, pos: [-2.5, 0.25, 2.3], hint: '🩹 Kit de Reparación obtenido (+25 HP)' },
+    ];
+
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 64;
+    glowCanvas.height = 64;
+    const gctx = glowCanvas.getContext('2d');
+    const gradient = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.3, 'rgba(255,255,255,0.6)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    gctx.fillStyle = gradient;
+    gctx.fillRect(0, 0, 64, 64);
+    const glowTex = new THREE.CanvasTexture(glowCanvas);
+
+    itemDefs.forEach((def) => {
+      const group = new THREE.Group();
+      group.position.set(def.pos[0], def.pos[1], def.pos[2]);
+
+      const box = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 0.07, 0.03),
+        new THREE.MeshPhongMaterial({
+          color: def.color,
+          emissive: def.color,
+          emissiveIntensity: 0.8,
+        })
+      );
+      box.castShadow = true;
+      group.add(box);
+
+      const spriteMat = new THREE.SpriteMaterial({
+        map: glowTex,
+        color: def.color,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(0.5, 0.5, 1);
+      sprite.position.y = 0.05;
+      group.add(sprite);
+
+      const entry = {
+        group,
+        data: def,
+        floatOffset: Math.random() * Math.PI * 2,
+        collected: false,
+      };
+      this._pickupItems.push(entry);
+
+      group.userData.interact = () => this._onPickup(entry);
+      group.userData.isPickup = true;
+
+      scene.add(group);
+      this.objects.push(group);
+    });
+  }
+
+  _onPickup(entry) {
+    if (entry.collected) return;
+    entry.collected = true;
+
+    const player = window.__game?.player;
+    const hud = window.__game?.hud;
+    if (!player || !hud) return;
+
+    const def = entry.data;
+    player.addItem({ id: def.id, name: def.name, icon: def.icon });
+
+    if (def.id === 'repair_kit') {
+      player.heal(25);
+    }
+
+    hud.showMessage(def.hint, 2500);
+
+    this.scene.remove(entry.group);
+    const objIdx = this.objects.indexOf(entry.group);
+    if (objIdx !== -1) this.objects.splice(objIdx, 1);
+
+    this._rebuildInteractiveObjects();
+    if (window.__game?.player) {
+      window.__game.player.setInteractiveObjects(this.interactiveObjects);
+    }
+  }
+
+  _rebuildInteractiveObjects() {
+    const arr = [];
+    this._consoleGroups.forEach(g => {
+      g.traverse(c => { if (c.isMesh) arr.push(c); });
+    });
+    this._pickupItems.forEach(entry => {
+      if (!entry.collected) {
+        entry.group.traverse(c => { if (c.isMesh) arr.push(c); });
+      }
+    });
+    this.interactiveObjects = arr;
   }
 
   _buildPipes(scene) {
@@ -201,14 +407,14 @@ export class EngineRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0x111122, 0.5);
+    const ambient = new THREE.AmbientLight(0x445566, 2.5);
     scene.add(ambient);
     this.lights.push(ambient);
 
     for (let i = 0; i < 4; i++) {
       const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
       const r = 3.0;
-      const emLight = new THREE.PointLight(0xff0000, 0.4, 6);
+      const emLight = new THREE.PointLight(0xff0000, 2.5, 15);
       emLight.position.set(Math.cos(angle) * r, 1.6, Math.sin(angle) * r);
       scene.add(emLight);
       this.flickerLights.push({
@@ -220,8 +426,15 @@ export class EngineRoom {
       this.lights.push(emLight);
     }
 
-    const dimCeiling = new THREE.PointLight(0xffff88, 0.15, 8);
+    const dimCeiling = new THREE.PointLight(0xffffff, 2.5, 20);
     dimCeiling.position.set(0, 2.2, 0);
+
+    const dirLight = new THREE.DirectionalLight(0xaaccff, 1.5);
+    dirLight.position.set(5, 8, 5);
+    dirLight.target.position.set(0, 0, 0);
+    scene.add(dirLight.target);
+    scene.add(dirLight);
+    this.lights.push(dirLight, dirLight.target);
     scene.add(dimCeiling);
     this.flickerLights.push({
       light: dimCeiling,
@@ -294,10 +507,24 @@ export class EngineRoom {
 
   update(delta, time) {
     this.flickerLights.forEach(f => {
-      const flicker = Math.sin(time * f.speed + f.light.id) * f.amplitude;
-      const noise = (Math.random() - 0.5) * 0.15;
-      f.light.intensity = Math.max(0, f.baseIntensity + flicker + noise);
+      f.light.intensity = f.baseIntensity;
     });
+
+    this._pickupItems.forEach(entry => {
+      if (entry.collected) return;
+      const t = time + entry.floatOffset;
+      entry.group.position.y = entry.data.pos[1] + Math.sin(t * 3) * 0.03;
+      entry.group.rotation.y += delta * 1.5;
+    });
+
+    if (this.gateOpen && this.gateAnimT < 1) {
+      this.gateAnimT = Math.min(1, this.gateAnimT + delta * 0.8);
+      const t = this.gateAnimT;
+      const eased = t * t * (3 - 2 * t);
+      if (this.gateDoor) {
+        this.gateDoor.position.y = -0.5 + eased * 3.0;
+      }
+    }
 
     if (this.particles) {
       const positions = this.particles.geometry.attributes.position.array;
@@ -342,5 +569,11 @@ export class EngineRoom {
     this.flickerLights = [];
     this.interactiveObjects = [];
     this.particles = null;
+    this.gateDoor = null;
+    this.gateOpen = false;
+    this.gateAnimT = 0;
+    this._pickupItems = [];
+    this._consoleGroups = [];
+    this._consoleScreens = [];
   }
 }

@@ -25,12 +25,12 @@
 | Inicialización Three.js | ✅ | Scene, Camera, WebGLRenderer, ToneMapping |
 | Game loop | ✅ | requestAnimationFrame + deltaTime clock |
 | Controles (WASD + mouse) | ✅ | PointerLockControls, jump, crouch, run |
-| Colisiones | 🟡 | Bounding box walls — falta Raycaster contra meshes reales |
-| Sala de Máquinas | 🟡 | Kenney room-large + cables + reactor + pipes + partículas + luces — falta items interactivos + audio |
+| Colisiones | ✅ | AABB Box3 con per-axis slide — 11 cajas estáticas |
+| Sala de Máquinas | 🟡 | Kenney room + reactor + pipes + partículas + luces + items pickups + consolas interactivas — falta audio |
 | Laboratorio | ❌ | Escenario 2 |
 | Puente de Mando | ❌ | Escenario 3 |
-| Sistema de puzzles | ❌ | Objetos + terminales con código |
-| Ítems / inventario | 🟡 | Sistema de inventario (Player.addItem/hasItem/removeItem) |
+| Sistema de puzzles | ✅ | 2 consolas: batería → reactor, tarjeta → puerta |
+| Ítems / inventario | ✅ | 3 pickup: tarjeta, batería, kit reparación + inventario HUD |
 | IA enemigos | ❌ | Drones patrulla + persecución |
 | Partículas | 🟡 | Steam/vapor con PointsMaterial (engine room) |
 | Audio | ❌ | Música + SFX |

@@ -125,7 +125,7 @@ luego replicar el patrón en Laboratorio y Puente de Mando. Esto evita acumular 
 - [x] Pantalla pausa
 - [x] Pantalla de juego (canvas Three.js + loading screen)
 - [x] 4 ejercicios realizados en clase (1-8 completados)
-- [ ] Detección y uso de colisiones
+- [x] Detección y uso de colisiones
 - [x] Iluminación ambiental (AmbientLight en Sala Máquinas)
 - [x] Iluminación focal (PointLights parpadeantes en Sala Máquinas)
 - [ ] 2 niveles de dificultad (no basados en tiempo)
@@ -134,7 +134,7 @@ luego replicar el patrón en Laboratorio y Puente de Mando. Esto evita acumular 
 - [ ] Servicio web (API REST)
 - [ ] Uso de redes sociales (compartir puntuación)
 - [ ] Efectos de sonido y música de fondo
-- [ ] 3+ ítems especiales
+- [x] 3+ ítems especiales
 - [ ] Multijugador en tiempo real
 - [x] Partículas (PointsMaterial — vapor en Sala Máquinas)
 - [ ] IA (seguimiento de enemigos al personaje)
