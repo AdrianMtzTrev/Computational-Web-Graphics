@@ -182,38 +182,50 @@ export class LabRoom {
 
     const xs = [-9, -7, -5, -3, -1, 1, 3, 5, 7, 9];
 
-    // Build set of 1-2 random positions for V4 ventilation panels
-    const allKeys = [];
+    // Build pool of valid V4 positions (no corners, no door gap)
+    const pool = [];
     xs.forEach(x => {
-      allKeys.push(`n_${x}`);
-      if (x !== -1 && x !== 1) allKeys.push(`s_${x}`);
-      allKeys.push(`w_${x}`);
-      allKeys.push(`e_${x}`);
+      if (x === -9 || x === 9) return;
+      ['n', 's', 'w', 'e'].forEach(wall => {
+        if (wall === 's' && (x === -1 || x === 1)) return;
+        pool.push(wall + '_' + x + '_y1');
+        pool.push(wall + '_' + x + '_y3');
+      });
     });
-    const shuffled = [...allKeys].sort(() => Math.random() - 0.5);
-    const numV4 = 1 + Math.floor(Math.random() * 2);
-    const v4Set = new Set(shuffled.slice(0, numV4));
 
-    const pick = (wall, x) => {
-      const m = v4Set.has(wall + '_' + x) && w4 ? w4 : w5;
+    // Pick 2 positions on different walls
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const v4Set = new Set();
+    for (const key of shuffled) {
+      if (v4Set.size >= 2) break;
+      const wall = key.split('_')[0];
+      let sameWall = false;
+      for (const existing of v4Set) {
+        if (existing.split('_')[0] === wall) { sameWall = true; break; }
+      }
+      if (!sameWall) v4Set.add(key);
+    }
+
+    const pick = (wall, x, y) => {
+      const m = v4Set.has(wall + '_' + x + '_y' + y) && w4 ? w4 : w5;
       return m;
     };
 
     // North wall (z=10)
-    xs.forEach(x => { place(pick('n', x), x, 10, Math.PI / 2, 1); place(pick('n', x), x, 10, Math.PI / 2, 3); });
+    xs.forEach(x => { place(pick('n', x, 1), x, 10, Math.PI / 2, 1); place(pick('n', x, 3), x, 10, Math.PI / 2, 3); });
 
     // South wall (z=-10), skip center 2 panels for door gap
     xs.forEach(x => {
       if (x === -1 || x === 1) return;
-      place(pick('s', x), x, -10, -Math.PI / 2, 1);
-      place(pick('s', x), x, -10, -Math.PI / 2, 3);
+      place(pick('s', x, 1), x, -10, -Math.PI / 2, 1);
+      place(pick('s', x, 3), x, -10, -Math.PI / 2, 3);
     });
 
     // West wall (x=-10)
-    xs.forEach(z => { place(pick('w', z), -10, z, Math.PI, 1); place(pick('w', z), -10, z, Math.PI, 3); });
+    xs.forEach(z => { place(pick('w', z, 1), -10, z, Math.PI, 1); place(pick('w', z, 3), -10, z, Math.PI, 3); });
 
     // East wall (x=10)
-    xs.forEach(z => { place(pick('e', z), 10, z, 0, 1); place(pick('e', z), 10, z, 0, 3); });
+    xs.forEach(z => { place(pick('e', z, 1), 10, z, 0, 1); place(pick('e', z, 3), 10, z, 0, 3); });
   }
 
   _buildTerminal(scene) {
