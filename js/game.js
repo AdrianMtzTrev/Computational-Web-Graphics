@@ -78,6 +78,8 @@ export class Game {
     };
     document.addEventListener('keydown', this._onCaptureKeyDown, { capture: true });
 
+    this._resumeCleanup = null;
+
 
 
     this.controls.addEventListener('unlock', () => {
@@ -118,9 +120,33 @@ export class Game {
 
   resume() {
     if (!this.isRunning || !this.isPaused) return;
+
+    if (this._resumeCleanup) this._resumeCleanup();
+
     this.isPaused = false;
     this.clock.start();
     this.controls.lock();
+
+    const onLock = () => {
+      document.removeEventListener('pointerlockerror', onLockError);
+      this.controls.removeEventListener('lock', onLock);
+      this._resumeCleanup = null;
+    };
+    const onLockError = () => {
+      this.controls.removeEventListener('lock', onLock);
+      this._resumeCleanup = null;
+      if (!this.isPaused) {
+        window.dispatchEvent(new CustomEvent('game-pause'));
+      }
+    };
+    this.controls.addEventListener('lock', onLock);
+    document.addEventListener('pointerlockerror', onLockError, { once: true });
+
+    this._resumeCleanup = () => {
+      this.controls.removeEventListener('lock', onLock);
+      document.removeEventListener('pointerlockerror', onLockError);
+      this._resumeCleanup = null;
+    };
   }
 
   restart() {
@@ -160,6 +186,7 @@ export class Game {
     this.controls.removeEventListener('unlock');
     document.removeEventListener('keydown', this._onKeyDown);
     window.removeEventListener('resize', this._onResize);
+    this._resumeCleanup = null;
     this.sceneManager.dispose();
     this.engineRoom.unload(this.scene);
     if (this.player) {

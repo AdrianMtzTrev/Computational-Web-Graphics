@@ -57,6 +57,7 @@ document.addEventListener('keydown', function(e) {
   const pauseActive = document.getElementById('screen-pause').classList.contains('active');
 
   if (gameActive && gameInstance && !gameInstance.controls.isLocked && !gameInstance.isPaused) {
+    pauseGame();
     return;
   }
 
