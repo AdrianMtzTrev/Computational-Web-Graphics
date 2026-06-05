@@ -80,13 +80,12 @@ export class Game {
 
     this._resumeCleanup = null;
 
-
-
-    this.controls.addEventListener('unlock', () => {
+    this._onUnlock = () => {
       if (this.isRunning && !this.isPaused) {
         window.dispatchEvent(new CustomEvent('game-pause'));
       }
-    });
+    };
+    this.controls.addEventListener('unlock', this._onUnlock);
   }
 
   async start() {
@@ -183,7 +182,7 @@ export class Game {
   stop() {
     this.isRunning = false;
     this.controls.unlock();
-    this.controls.removeEventListener('unlock');
+    this.controls.removeEventListener('unlock', this._onUnlock);
     document.removeEventListener('keydown', this._onKeyDown);
     window.removeEventListener('resize', this._onResize);
     this._resumeCleanup = null;
@@ -218,8 +217,7 @@ export class Game {
       this.player.update(delta);
       this.sceneManager.update(delta, this.clock.elapsedTime);
       this.hud.update(this.player);
+      this.renderer.render(this.scene, this.camera);
     }
-
-    this.renderer.render(this.scene, this.camera);
   }
 }

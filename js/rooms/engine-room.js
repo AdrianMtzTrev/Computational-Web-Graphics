@@ -648,7 +648,7 @@ export class EngineRoom {
       // Corridor walls (door at z=-8, corridor extends to z=-11)
       new THREE.Box3(new THREE.Vector3(-2.0, 0, -11.0), new THREE.Vector3(-1.8, 3.0, -8.0)),
       new THREE.Box3(new THREE.Vector3(1.8, 0, -11.0), new THREE.Vector3(2.0, 3.0, -8.0)),
-      new THREE.Box3(new THREE.Vector3(-2.0, 0, -11.2), new THREE.Vector3(2.0, 3.0, -11.0)),
+      new THREE.Box3(new THREE.Vector3(-2.0, 0, -11.7), new THREE.Vector3(2.0, 3.0, -11.5)),
 
       // Reactor area
       new THREE.Box3(new THREE.Vector3(-1.5, 0, -1.0), new THREE.Vector3(1.5, 3.0, 2.0)),
