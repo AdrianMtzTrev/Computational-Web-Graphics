@@ -89,9 +89,8 @@ export class EngineRoom {
   }
 
   async _buildMoltenRoom(scene) {
-    const [sciFiFloor, ceilingTile, ceilingLight] = await Promise.allSettled([
+    const [sciFiFloor, ceilingLight] = await Promise.allSettled([
       this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_005_V1.0/02_EXPORT/OBJ/SM_Floor_V1.glb'),
-      this._loadMolten('Ceiling_Tile_Grey_Metal.glb'),
       this._loadMolten('Ceiling_Light.glb'),
     ]);
 
@@ -120,12 +119,11 @@ export class EngineRoom {
       }
     }
 
-    // Ceiling tiles (4×4 grid at y=4)
-    const ct = ceilingTile.status === 'fulfilled' ? ceilingTile.value : null;
-    if (ct) {
-      for (let ix = -6; ix <= 6; ix += 4) {
-        for (let iz = -6; iz <= 6; iz += 4) {
-          cloneAt(ct, ix, iz, 0, 4);
+    // Ceiling tiles (8×8 grid of 2×2 sci-fi floor tiles at y=4)
+    if (ft) {
+      for (let ix = -7; ix <= 7; ix += 2) {
+        for (let iz = -7; iz <= 7; iz += 2) {
+          cloneAt(ft, ix, iz, 0, 4);
         }
       }
     }
