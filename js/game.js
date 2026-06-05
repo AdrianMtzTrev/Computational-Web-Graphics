@@ -28,6 +28,10 @@ export class Game {
       this.isRunning = false;
     }, false);
 
+    this.renderer.domElement.addEventListener('webglcontextrestored', () => {
+      this.isRunning = true;
+    }, false);
+
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x000000);
     this.scene.fog = new THREE.Fog(0x050510, 6, 16);
@@ -142,7 +146,7 @@ export class Game {
       if (room.getColliders) this.player.setColliders(room.getColliders());
     }
 
-    this.camera.position.set(0, 1.7, 1.5);
+    this.camera.position.set(0, 2, 0);
     this.player.feetY = 0;
 
     document.getElementById('loading-screen').classList.remove('active');

@@ -33,26 +33,18 @@ export class LabRoom {
     this.stationLoader.setPath('assets/kenney_space-station-kit/Models/GLB format/');
     this.stationLoader.setResourcePath('assets/kenney_space-station-kit/Models/GLB format/Textures/');
 
-    this.labLoader = new GLTFLoader();
-    this.labLoader.setPath('assets/models/lab-kit/GLB/All/');
+    this.moltenLoader = new GLTFLoader();
+    this.moltenLoader.setPath('assets/models/molten-maps/');
   }
 
   async load(scene) {
     this.scene = scene;
 
-    const critical = await Promise.all([
-      this._loadModular('room-small.glb'),
-      this._loadModular('gate-lasers.glb'),
-    ]);
+    await this._buildMoltenRoom(scene);
 
-    const roomShell = critical[0];
-    roomShell.position.set(0, -0.5, 0);
-    roomShell.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    scene.add(roomShell);
-    this.objects.push(roomShell);
-
-    this.gateLasers = critical[1];
-    this.gateLasers.position.set(0, -0.5, -2.6);
+    const gate = await this._loadModular('gate-lasers.glb');
+    this.gateLasers = gate;
+    this.gateLasers.position.set(0, 0, -10.2);
     this.gateLasers.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
     scene.add(this.gateLasers);
     this.objects.push(this.gateLasers);
@@ -70,8 +62,6 @@ export class LabRoom {
       }
     });
 
-    this._loadDecorModels(scene);
-    this._buildFurniture(scene);
     this._buildTerminal(scene);
     this._buildPickupItems(scene);
     this._setupLights(scene);
@@ -98,201 +88,67 @@ export class LabRoom {
     });
   }
 
-  _loadLabModel(name) {
+  _loadMolten(name) {
     return new Promise(resolve => {
-      this.labLoader.load(name, gltf => resolve(gltf.scene), undefined, () => resolve(null));
+      this.moltenLoader.load(name, gltf => resolve(gltf.scene), undefined, () => resolve(null));
     });
   }
 
-  async _loadDecorModels(scene) {
-    const deco = await Promise.allSettled([
-      this._loadStationModel('table.glb'),
-      this._loadStationModel('chair.glb'),
-      this._loadStationModel('computer-screen.glb'),
-      this._loadStationModel('pipe.glb'),
-      this._loadStationModel('wall-banner.glb'),
-      this._loadLabModel('counter_counter.glb'),
-      this._loadLabModel('counter_counter_sink.glb'),
-      this._loadLabModel('machine_microscope.glb'),
-      this._loadLabModel('machine_centrifuge.glb'),
-      this._loadLabModel('machine_electronic_scale.glb'),
-      this._loadLabModel('bottle_glassware_erlenmeyer_flask_medium.glb'),
-      this._loadLabModel('bottle_glassware_beaker_small.glb'),
-      this._loadLabModel('bottle_test_tube_rack.glb'),
-      this._loadLabModel('ppe_safety_glasses.glb'),
-      this._loadLabModel('syringe_syringe.glb'),
+  async _buildMoltenRoom(scene) {
+    const [floor, wall, doorWall] = await Promise.allSettled([
+      this._loadMolten('Floor_Metal_Square.glb'),
+      this._loadMolten('Wall_Grey.glb'),
+      this._loadMolten('Wall_With_Door_Grey.glb'),
     ]);
 
-    const results = deco.map(r => r.status === 'fulfilled' ? r.value : null);
+    const setup = (obj) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    };
 
-    const table = results[0];
-    if (table) {
-      table.position.set(0, 0, 1.0);
-      scene.add(table);
-      this.objects.push(table);
-    } else {
-      this._buildFallbackTable(scene);
+    const cloneAt = (model, x, z, ry = 0) => {
+      if (!model) return null;
+      const c = model.clone();
+      c.position.set(x, 0, z);
+      c.rotation.y = ry;
+      setup(c);
+      scene.add(c);
+      this.objects.push(c);
+      return c;
+    };
+
+    // Floor tiles (5x5 grid, assumes tile is ~4x4 → 20x20 room)
+    const ft = floor.status === 'fulfilled' ? floor.value : null;
+    if (ft) {
+      for (let ix = -8; ix <= 8; ix += 4) {
+        for (let iz = -8; iz <= 8; iz += 4) {
+          cloneAt(ft, ix, iz);
+        }
+      }
     }
 
-    const chair = results[1];
-    if (chair) {
-      chair.position.set(-0.8, 0, 1.2);
-      chair.rotation.y = 0.3;
-      scene.add(chair);
-      this.objects.push(chair);
-    }
+    const w = wall.status === 'fulfilled' ? wall.value : null;
+    const dw = doorWall.status === 'fulfilled' ? doorWall.value : null;
 
-    const computer = results[2];
-    if (computer) {
-      computer.position.set(0, 0.8, 0.8);
-      computer.rotation.y = 0.5;
-      scene.add(computer);
-      this.objects.push(computer);
-    }
+    if (!w && !dw) return;
 
-    const pipe = results[3];
-    if (pipe) {
-      const p1 = pipe.clone();
-      p1.position.set(-1.5, 2.0, -1.0);
-      p1.scale.set(1.5, 1.5, 1.5);
-      p1.rotation.z = Math.PI / 2;
-      scene.add(p1);
-      this.objects.push(p1);
+    // Helper to place wall row
+    const rowAtZ = (z, xs) => xs.forEach(x => cloneAt(w || dw, x, z, 0));
+    const rowAtX = (x, zs) => zs.forEach(z => cloneAt(w || dw, x, z, Math.PI / 2));
 
-      const p2 = pipe.clone();
-      p2.position.set(1.5, 2.0, 1.0);
-      p2.scale.set(1.5, 1.5, 1.5);
-      p2.rotation.z = Math.PI / 2;
-      scene.add(p2);
-      this.objects.push(p2);
-    }
+    // North wall (z = 10): 5 panels
+    rowAtZ(10, [-8, -4, 0, 4, 8]);
 
-    const banner = results[4];
-    if (banner) {
-      banner.position.set(0, 1.2, 2.5);
-      scene.add(banner);
-      this.objects.push(banner);
-    }
+    // South wall (z = -10): 4 regular + 1 door wall centered at x=0
+    rowAtZ(-10, [-8, -4]);
+    if (dw) cloneAt(dw, 0, -10, 0);
+    else if (w) cloneAt(w, 0, -10, 0);
+    rowAtZ(-10, [4, 8]);
 
-    const counterLeft = results[5];
-    if (counterLeft) {
-      counterLeft.position.set(-1.9, 0, 1.2);
-      counterLeft.scale.set(0.8, 0.8, 0.8);
-      scene.add(counterLeft);
-      this.objects.push(counterLeft);
-    }
+    // West wall (x = -10): 5 panels
+    rowAtX(-10, [-8, -4, 0, 4, 8]);
 
-    const counterRight = results[6];
-    if (counterRight) {
-      counterRight.position.set(1.9, 0, -1.2);
-      counterRight.scale.set(0.8, 0.8, 0.8);
-      counterRight.rotation.y = Math.PI;
-      scene.add(counterRight);
-      this.objects.push(counterRight);
-    }
-
-    const microscope = results[7];
-    if (microscope) {
-      microscope.position.set(1.5, 0.8, -0.8);
-      microscope.scale.set(0.4, 0.4, 0.4);
-      scene.add(microscope);
-      this.objects.push(microscope);
-    }
-
-    const centrifuge = results[8];
-    if (centrifuge) {
-      centrifuge.position.set(2.2, 0.8, -1.5);
-      centrifuge.scale.set(0.4, 0.4, 0.4);
-      scene.add(centrifuge);
-      this.objects.push(centrifuge);
-    }
-
-    const scale = results[9];
-    if (scale) {
-      scale.position.set(1.5, 0.8, -0.1);
-      scale.scale.set(0.4, 0.4, 0.4);
-      scene.add(scale);
-      this.objects.push(scale);
-    }
-
-    const flask = results[10];
-    if (flask) {
-      flask.position.set(-1.5, 0.8, 1.8);
-      flask.scale.set(0.5, 0.5, 0.5);
-      scene.add(flask);
-      this.objects.push(flask);
-    }
-
-    const beaker = results[11];
-    if (beaker) {
-      beaker.position.set(-1.8, 0.8, 1.5);
-      beaker.scale.set(0.5, 0.5, 0.5);
-      scene.add(beaker);
-      this.objects.push(beaker);
-    }
-
-    const rack = results[12];
-    if (rack) {
-      rack.position.set(-2.2, 0.8, 1.0);
-      rack.scale.set(0.5, 0.5, 0.5);
-      scene.add(rack);
-      this.objects.push(rack);
-    }
-
-    const glasses = results[13];
-    if (glasses) {
-      glasses.position.set(1.8, 0.8, -0.5);
-      glasses.scale.set(0.5, 0.5, 0.5);
-      scene.add(glasses);
-      this.objects.push(glasses);
-    }
-
-    const syringe = results[14];
-    if (syringe) {
-      syringe.position.set(-1.2, 0.8, 2.0);
-      syringe.scale.set(0.4, 0.4, 0.4);
-      scene.add(syringe);
-      this.objects.push(syringe);
-    }
-  }
-
-  _buildFallbackTable(scene) {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x555566, metalness: 0.4, roughness: 0.6 });
-    const top = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 1.0), mat);
-    top.position.set(0, 0.75, 1.0);
-    top.castShadow = true;
-    top.receiveShadow = true;
-    scene.add(top);
-    this.objects.push(top);
-
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x444455, metalness: 0.6, roughness: 0.4 });
-    const positions = [[-0.7, 0, 0.65], [0.7, 0, 0.65], [-0.7, 0, 1.35], [0.7, 0, 1.35]];
-    positions.forEach(p => {
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 6), legMat);
-      leg.position.set(p[0], 0.35, p[2]);
-      scene.add(leg);
-      this.objects.push(leg);
-    });
-  }
-
-  _buildFallbackCounter(scene, x, z) {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x444466, metalness: 0.3, roughness: 0.7 });
-    const counter = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 2.4), mat);
-    counter.position.set(x, 0.5, z);
-    counter.castShadow = true;
-    counter.receiveShadow = true;
-    scene.add(counter);
-    this.objects.push(counter);
-  }
-
-  _buildFurniture(scene) {
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.8, metalness: 0.1 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 5.0), floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, -0.48, 0);
-    floor.receiveShadow = true;
-    scene.add(floor);
-    this.objects.push(floor);
+    // East wall (x = 10): 5 panels
+    rowAtX(10, [-8, -4, 0, 4, 8]);
   }
 
   _buildTerminal(scene) {
@@ -472,35 +328,28 @@ export class LabRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0x111133, 0.4);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambient);
     this.lights.push(ambient);
 
-    const positions = [[-2.0, 1.8, -2.0], [2.0, 1.8, -2.0], [-2.0, 1.8, 2.0], [2.0, 1.8, 2.0]];
+    const positions = [[-6, 3.0, -6], [6, 3.0, -6], [-6, 3.0, 6], [6, 3.0, 6], [0, 3.5, 0]];
     positions.forEach(p => {
-      const light = new THREE.PointLight(0x4488ff, 0.3, 12);
+      const light = new THREE.PointLight(0xffffff, 1.5, 14);
       light.position.set(p[0], p[1], p[2]);
       scene.add(light);
-      this.flickerLights.push({ light, baseIntensity: 0.3, speed: 2 + Math.random() * 2, amplitude: 0.2 });
       this.lights.push(light);
     });
-
-    const ceiling = new THREE.PointLight(0x88ccff, 0.12, 15);
-    ceiling.position.set(0, 2.2, 0);
-    scene.add(ceiling);
-    this.flickerLights.push({ light: ceiling, baseIntensity: 0.12, speed: 1.5, amplitude: 0.1 });
-    this.lights.push(ceiling);
   }
 
   _setupParticles(scene) {
-    const count = 200;
+    const count = 500;
     const positions = new Float32Array(count * 3);
     this.particleVelocities = [];
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 4;
-      positions[i * 3 + 1] = Math.random() * 2.0;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+      positions[i * 3] = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 1] = Math.random() * 3.0;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
       this.particleVelocities.push({
         vx: (Math.random() - 0.5) * 0.05,
         vy: Math.random() * 0.15 + 0.05,
@@ -515,7 +364,7 @@ export class LabRoom {
       color: 0x88ccff,
       size: 0.04,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.12,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true,
@@ -529,16 +378,12 @@ export class LabRoom {
 
   _setupColliders() {
     this.colliders = [
-      new THREE.Box3(new THREE.Vector3(-2.6, 0, -2.6), new THREE.Vector3(-2.3, 3.0, 2.6)),
-      new THREE.Box3(new THREE.Vector3(2.3, 0, -2.6), new THREE.Vector3(2.6, 3.0, 2.6)),
-      new THREE.Box3(new THREE.Vector3(-2.6, 0, 2.3), new THREE.Vector3(2.6, 3.0, 2.6)),
-      new THREE.Box3(new THREE.Vector3(-2.6, 0, -2.6), new THREE.Vector3(-0.8, 3.0, -2.3)),
-      new THREE.Box3(new THREE.Vector3(0.8, 0, -2.6), new THREE.Vector3(2.6, 3.0, -2.3)),
-
-      new THREE.Box3(new THREE.Vector3(-2.4, 0, 0.0), new THREE.Vector3(-1.3, 1.0, 2.4)),
-      new THREE.Box3(new THREE.Vector3(1.3, 0, -2.4), new THREE.Vector3(2.4, 1.0, 0.0)),
-      new THREE.Box3(new THREE.Vector3(-0.8, 0, 0.0), new THREE.Vector3(0.8, 0.8, 1.4)),
-      new THREE.Box3(new THREE.Vector3(-2.4, 0, -2.4), new THREE.Vector3(-1.5, 1.8, -1.2)),
+      new THREE.Box3(new THREE.Vector3(-10.2, 0, -10), new THREE.Vector3(-9.8, 4, 10)),
+      new THREE.Box3(new THREE.Vector3(9.8, 0, -10), new THREE.Vector3(10.2, 4, 10)),
+      new THREE.Box3(new THREE.Vector3(-10, 0, 9.8), new THREE.Vector3(10, 4, 10.2)),
+      // South wall — gap for door at x=0 (~1.6m wide)
+      new THREE.Box3(new THREE.Vector3(-10, 0, -10.2), new THREE.Vector3(-0.8, 4, -9.8)),
+      new THREE.Box3(new THREE.Vector3(0.8, 0, -10.2), new THREE.Vector3(10, 4, -9.8)),
     ];
   }
 
@@ -581,10 +426,10 @@ export class LabRoom {
         positions[i * 3 + 1] += this.particleVelocities[i].vy * delta;
         positions[i * 3 + 2] += this.particleVelocities[i].vz * delta;
 
-        if (positions[i * 3 + 1] > 2.0) {
-          positions[i * 3] = (Math.random() - 0.5) * 4;
+        if (positions[i * 3 + 1] > 3.0) {
+          positions[i * 3] = (Math.random() - 0.5) * 16;
           positions[i * 3 + 1] = 0;
-          positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
         }
       }
       this.particles.geometry.attributes.position.needsUpdate = true;

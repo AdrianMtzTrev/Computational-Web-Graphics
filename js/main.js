@@ -33,12 +33,12 @@ function pauseGame() {
 }
 
 function resumeGame() {
+  showScreen('game');
+  var hud = document.getElementById('game-hud');
+  if (hud) hud.style.display = '';
   if (gameInstance) {
     gameInstance.resume();
   }
-  var hud = document.getElementById('game-hud');
-  if (hud) hud.style.display = '';
-  showScreen('game');
 }
 
 function exitToMenu() {

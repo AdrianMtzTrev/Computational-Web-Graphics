@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export class HUD {
   constructor() {
     this.container = document.createElement('div');
@@ -16,6 +18,7 @@ export class HUD {
       <div id="hud-inventory"></div>
       <div id="hud-message"></div>
       <div id="hud-flashlight">🔦</div>
+      <div id="hud-debug" style="display:none"></div>
     `;
 
     this.crosshair = document.getElementById('hud-crosshair');
@@ -25,6 +28,11 @@ export class HUD {
     this.inventoryEl = document.getElementById('hud-inventory');
     this.messageEl = document.getElementById('hud-message');
     this.flashlightEl = document.getElementById('hud-flashlight');
+    this.debugEl = document.getElementById('hud-debug');
+    this._debugVisible = false;
+    this._fpsFrames = 0;
+    this._fpsTime = 0;
+    this._fps = 0;
 
     const style = document.createElement('style');
     style.textContent = `
@@ -118,6 +126,19 @@ export class HUD {
         transition: opacity 0.3s ease;
       }
       #hud-flashlight.on { opacity: 1; }
+      #hud-debug {
+        position: absolute; top: 10px; left: 10px;
+        background: rgba(0,0,0,0.7);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 4px;
+        padding: 10px 14px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: #00d4ff;
+        text-shadow: 0 0 4px rgba(0, 212, 255, 0.3);
+        white-space: pre;
+        min-width: 240px;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -140,6 +161,39 @@ export class HUD {
     });
 
     this.flashlightEl.className = player.flashlightOn ? 'on' : '';
+
+    if (this._debugVisible) {
+      this._fpsFrames++;
+      const now = performance.now();
+      if (now - this._fpsTime >= 1000) {
+        this._fps = this._fpsFrames;
+        this._fpsFrames = 0;
+        this._fpsTime = now;
+      }
+
+      const p = player.camera.position;
+      const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+      euler.setFromQuaternion(player.camera.quaternion);
+      const yaw = THREE.MathUtils.radToDeg(euler.y);
+      const pitch = THREE.MathUtils.radToDeg(euler.x);
+
+      const room = window.__game?.sceneManager?.currentRoomId || '?';
+
+      this.debugEl.textContent =
+        `POS: (${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)})\n` +
+        `YAW: ${yaw.toFixed(1)}°  PITCH: ${pitch.toFixed(1)}°\n` +
+        `ROOM: ${room}\n` +
+        `FPS: ${this._fps}\n` +
+        `GRD: ${player.isOnGround ? 'yes' : 'no'}  SPD: ${player.speed.toFixed(1)}\n` +
+        `VEL: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)}, ${player.velocity.z.toFixed(1)})\n` +
+        `INV: ${player.inventory.length} items\n` +
+        `FL: ${player.flashlightOn ? 'on' : 'off'}`;
+    }
+  }
+
+  toggleDebug() {
+    this._debugVisible = !this._debugVisible;
+    this.debugEl.style.display = this._debugVisible ? 'block' : 'none';
   }
 
   showMessage(text, duration) {

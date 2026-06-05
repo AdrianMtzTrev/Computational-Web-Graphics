@@ -44,6 +44,7 @@ export class Player {
       if (e.code === 'KeyE') this._tryInteract();
       if (e.code === 'Space') this._jump();
       if (e.code === 'KeyF') this._toggleFlashlight();
+      if (e.code === 'KeyI') window.__game?.hud?.toggleDebug();
     };
     this._onKeyUp = (e) => {
       this.keys[e.code] = false;
