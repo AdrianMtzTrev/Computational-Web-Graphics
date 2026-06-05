@@ -74,6 +74,15 @@ window.addEventListener('game-pause', function() {
   }
 });
 
+window.addEventListener('game-win', function() {
+  var hud = document.getElementById('game-hud');
+  if (hud) hud.style.display = 'none';
+  showScreen('win');
+});
+
+document.getElementById('btn-win-restart').addEventListener('click', startGame);
+document.getElementById('btn-win-menu').addEventListener('click', exitToMenu);
+
 var sliders = [
   { slider: 'volume-master', display: 'volume-master-val' },
   { slider: 'volume-music',  display: 'volume-music-val'  },
