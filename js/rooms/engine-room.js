@@ -9,9 +9,9 @@ export class EngineRoom {
     this.interactiveObjects = [];
     this.colliders = [];
     this.particles = null;
-    this.gateDoor = null;
-    this.gateOpen = false;
-    this.gateAnimT = 0;
+    this.sciFiDoor = null;
+    this.sciFiDoorOpen = false;
+    this.sciFiDoorAnimT = 0;
     this._transitionCallback = null;
     this._transitionTriggered = false;
     this._pickupItems = [];
@@ -24,44 +24,31 @@ export class EngineRoom {
     this.loader = new GLTFLoader();
     this.loader.setPath('assets/models/modular-space-kit/');
     this.loader.setResourcePath('assets/models/modular-space-kit/Textures/');
+
+    this.moltenLoader = new GLTFLoader();
+    this.moltenLoader.setPath('assets/models/molten-maps/');
+    this.sciFiLoader = new GLTFLoader();
   }
 
   async load(scene) {
     this.scene = scene;
 
-    const roomModels = await Promise.all([
-      this._loadModel('room-large.glb'),
+    await this._buildMoltenRoom(scene);
+    await this._buildSciFiWalls(scene);
+    await this._buildSciFiCorridor(scene);
+
+    const [cablesModel] = await Promise.allSettled([
       this._loadModel('cables.glb'),
-      this._loadModel('gate-door.glb'),
-      this._loadModel('corridor.glb'),
     ]);
 
-    const roomLarge = roomModels[0];
-    roomLarge.position.set(0, -0.5, 0);
-    roomLarge.scale.set(1, 1, 1);
-    roomLarge.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    scene.add(roomLarge);
-    this.objects.push(roomLarge);
-
-    const cables = roomModels[1];
-    cables.position.set(0, 1.8, 0);
-    cables.scale.set(1.2, 1.2, 1.2);
-    cables.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    scene.add(cables);
-    this.objects.push(cables);
-
-    this.gateDoor = roomModels[2];
-    this.gateDoor.position.set(0, -0.5, -3.5);
-    this.gateDoor.rotation.y = Math.PI / 2;
-    this.gateDoor.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    scene.add(this.gateDoor);
-    this.objects.push(this.gateDoor);
-
-    const corridor = roomModels[3];
-    corridor.position.set(0, -0.5, -5.5);
-    corridor.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    scene.add(corridor);
-    this.objects.push(corridor);
+    if (cablesModel.status === 'fulfilled' && cablesModel.value) {
+      const cables = cablesModel.value;
+      cables.position.set(0, 1.8, 0);
+      cables.scale.set(1.2, 1.2, 1.2);
+      cables.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      scene.add(cables);
+      this.objects.push(cables);
+    }
 
     this._buildReactor(scene);
     this._buildConsoles(scene);
@@ -85,8 +72,176 @@ export class EngineRoom {
     });
   }
 
+  _loadMolten(name) {
+    return new Promise(resolve => {
+      this.moltenLoader.load(name, gltf => resolve(gltf.scene), undefined, () => resolve(null));
+    });
+  }
+
+  _loadSciFi(name) {
+    return new Promise(resolve => {
+      this.sciFiLoader.load('assets/models/sci-fi-series-a/' + name, gltf => resolve(gltf.scene), undefined, () => resolve(null));
+    });
+  }
+
   setTransitionCallback(cb) {
     this._transitionCallback = cb;
+  }
+
+  async _buildMoltenRoom(scene) {
+    const [floor, ceilingTile, ceilingLight] = await Promise.allSettled([
+      this._loadMolten('Floor_Metal_Square.glb'),
+      this._loadMolten('Ceiling_Tile_Grey_Metal.glb'),
+      this._loadMolten('Ceiling_Light.glb'),
+    ]);
+
+    const setup = (obj) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    };
+
+    const cloneAt = (model, x, z, ry = 0, y = 0) => {
+      if (!model) return null;
+      const c = model.clone();
+      c.position.set(x, y, z);
+      c.rotation.y = ry;
+      setup(c);
+      scene.add(c);
+      this.objects.push(c);
+      return c;
+    };
+
+    // Floor tiles (4×4 grid → 16×16 room)
+    const ft = floor.status === 'fulfilled' ? floor.value : null;
+    if (ft) {
+      for (let ix = -6; ix <= 6; ix += 4) {
+        for (let iz = -6; iz <= 6; iz += 4) {
+          cloneAt(ft, ix, iz);
+        }
+      }
+    }
+
+    // Ceiling tiles (4×4 grid at y=4)
+    const ct = ceilingTile.status === 'fulfilled' ? ceilingTile.value : null;
+    if (ct) {
+      for (let ix = -6; ix <= 6; ix += 4) {
+        for (let iz = -6; iz <= 6; iz += 4) {
+          cloneAt(ct, ix, iz, 0, 4);
+        }
+      }
+    }
+
+    // Ceiling lights at inner corners
+    const cl = ceilingLight.status === 'fulfilled' ? ceilingLight.value : null;
+    if (cl) {
+      cloneAt(cl, -4, -4, 0, 3.85);
+      cloneAt(cl, 4, -4, 0, 3.85);
+      cloneAt(cl, -4, 4, 0, 3.85);
+      cloneAt(cl, 4, 4, 0, 3.85);
+    }
+  }
+
+  async _buildSciFiWalls(scene) {
+    const [wallV3, doorFrame, doorV1] = await Promise.allSettled([
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_001+_V2.0/Pack_SciFi_A_001_V2.0/02_EXPORT/OBJ/SM_Wall_V3.glb'),
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_002_V1.0/02_EXPORT/OBJ/SM_DoorFrame_Single.glb'),
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_002_V1.0/02_EXPORT/OBJ/SM_Door_Single_V1.glb'),
+    ]);
+
+    const setup = (obj) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    };
+
+    const place = (model, x, z, ry, y = 1) => {
+      if (!model) return;
+      const c = model.clone();
+      c.position.set(x, y, z);
+      c.rotation.y = ry;
+      setup(c);
+      scene.add(c);
+      this.objects.push(c);
+    };
+
+    const w = wallV3.status === 'fulfilled' ? wallV3.value : null;
+    if (!w) return;
+
+    const xs = [-7, -5, -3, -1, 1, 3, 5, 7];
+
+    // North wall (z=8)
+    xs.forEach(x => { place(w, x, 8, Math.PI / 2, 1); place(w, x, 8, Math.PI / 2, 3); });
+
+    // South wall (z=-8), skip center 2 panels for door
+    xs.forEach(x => { if (x === -1 || x === 1) return; place(w, x, -8, -Math.PI / 2, 1); place(w, x, -8, -Math.PI / 2, 3); });
+
+    // West wall (x=-8)
+    xs.forEach(z => { place(w, -8, z, Math.PI, 1); place(w, -8, z, Math.PI, 3); });
+
+    // East wall (x=8)
+    xs.forEach(z => { place(w, 8, z, 0, 1); place(w, 8, z, 0, 3); });
+
+    // Door frame + door on south wall, scaled to fill 4m gap
+    const scale = 4.0 / 2.058;
+    const df = doorFrame.status === 'fulfilled' ? doorFrame.value : null;
+    if (df) {
+      const g = df.clone();
+      g.position.set(0, 0, -8);
+      g.rotation.y = -Math.PI / 2;
+      g.scale.set(scale, scale, scale);
+      setup(g);
+      scene.add(g);
+      this.objects.push(g);
+    }
+
+    const dv = doorV1.status === 'fulfilled' ? doorV1.value : null;
+    if (dv) {
+      const g = dv.clone();
+      g.position.set(0, 0, -8);
+      g.rotation.y = -Math.PI / 2;
+      g.scale.set(scale, scale, scale);
+      setup(g);
+      scene.add(g);
+      this.objects.push(g);
+      this.sciFiDoor = g;
+    }
+  }
+
+  async _buildSciFiCorridor(scene) {
+    const [wallV2, floorLarge] = await Promise.allSettled([
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_001+_V2.0/Pack_SciFi_A_001_V2.0/02_EXPORT/OBJ/SM_Wall_V2.glb'),
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_005_V1.0/02_EXPORT/OBJ/SM_Floor_V1_Large.glb'),
+    ]);
+
+    const setup = (obj) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    };
+
+    const place = (model, x, z, ry, y = 1) => {
+      if (!model) return;
+      const c = model.clone();
+      c.position.set(x, y, z);
+      c.rotation.y = ry;
+      setup(c);
+      scene.add(c);
+      this.objects.push(c);
+    };
+
+    const w = wallV2.status === 'fulfilled' ? wallV2.value : null;
+    const fl = floorLarge.status === 'fulfilled' ? floorLarge.value : null;
+
+    const zs = [-9, -11];
+
+    // Left corridor wall (x=-2), face points +X
+    if (w) zs.forEach(z => { place(w, -2, z, 0, 1); place(w, -2, z, 0, 3); });
+
+    // Right corridor wall (x=2), face points -X
+    if (w) zs.forEach(z => { place(w, 2, z, Math.PI, 1); place(w, 2, z, Math.PI, 3); });
+
+    // Corridor floor (2×2m tiles at y=0)
+    if (fl) {
+      place(fl, -1, -9, 0, 0);
+      place(fl, 1, -9, 0, 0);
+      place(fl, -1, -11, 0, 0);
+      place(fl, 1, -11, 0, 0);
+    }
   }
 
   _buildReactor(scene) {
@@ -268,8 +423,8 @@ export class EngineRoom {
   }
 
   _onAccessSolved() {
-    this.gateOpen = true;
-    this.gateAnimT = 0;
+    this.sciFiDoorOpen = true;
+    this.sciFiDoorAnimT = 0;
     const hud = window.__game?.hud;
     if (hud) hud.showMessage('🚪 PUERTA ABIERTA — ACCESO AL CORREDOR', 4000);
   }
@@ -413,7 +568,7 @@ export class EngineRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0x111122, 0.5);
+    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
     scene.add(ambient);
     this.lights.push(ambient);
 
@@ -483,18 +638,22 @@ export class EngineRoom {
 
   _setupColliders() {
     this._colliderBoxes = [
-      new THREE.Box3(new THREE.Vector3(-3.2, 0, 3.0), new THREE.Vector3(3.2, 3.0, 3.4)),
-      new THREE.Box3(new THREE.Vector3(-3.2, 0, -3.4), new THREE.Vector3(-0.6, 3.0, -3.0)),
-      new THREE.Box3(new THREE.Vector3(0.6, 0, -3.4), new THREE.Vector3(3.2, 3.0, -3.0)),
-      new THREE.Box3(new THREE.Vector3(-3.4, 0, -3.2), new THREE.Vector3(-3.0, 3.0, 3.2)),
-      new THREE.Box3(new THREE.Vector3(3.0, 0, -3.2), new THREE.Vector3(3.4, 3.0, 3.2)),
+      // Main room walls (16×16, walls at ±8)
+      new THREE.Box3(new THREE.Vector3(-8.0, 0, 7.8), new THREE.Vector3(8.0, 3.0, 8.0)),
+      new THREE.Box3(new THREE.Vector3(-8.0, 0, -8.0), new THREE.Vector3(-2.0, 3.0, -7.8)),
+      new THREE.Box3(new THREE.Vector3(2.0, 0, -8.0), new THREE.Vector3(8.0, 3.0, -7.8)),
+      new THREE.Box3(new THREE.Vector3(-8.0, 0, -8.0), new THREE.Vector3(-7.8, 3.0, 8.0)),
+      new THREE.Box3(new THREE.Vector3(7.8, 0, -8.0), new THREE.Vector3(8.0, 3.0, 8.0)),
 
-      new THREE.Box3(new THREE.Vector3(-1.2, 0, -5.5), new THREE.Vector3(-0.6, 3.0, -3.0)),
-      new THREE.Box3(new THREE.Vector3(0.6, 0, -5.5), new THREE.Vector3(1.2, 3.0, -3.0)),
-      new THREE.Box3(new THREE.Vector3(-1.2, 0, -5.7), new THREE.Vector3(1.2, 3.0, -5.5)),
+      // Corridor walls (door at z=-8, corridor extends to z=-11)
+      new THREE.Box3(new THREE.Vector3(-2.0, 0, -11.0), new THREE.Vector3(-1.8, 3.0, -8.0)),
+      new THREE.Box3(new THREE.Vector3(1.8, 0, -11.0), new THREE.Vector3(2.0, 3.0, -8.0)),
+      new THREE.Box3(new THREE.Vector3(-2.0, 0, -11.2), new THREE.Vector3(2.0, 3.0, -11.0)),
 
+      // Reactor area
       new THREE.Box3(new THREE.Vector3(-1.5, 0, -1.0), new THREE.Vector3(1.5, 3.0, 2.0)),
 
+      // Consoles
       new THREE.Box3(new THREE.Vector3(2.6, 0, 1.6), new THREE.Vector3(3.4, 0.7, 2.4)),
       new THREE.Box3(new THREE.Vector3(-3.2, 0, -2.4), new THREE.Vector3(-2.4, 0.7, -1.6)),
     ];
@@ -517,18 +676,18 @@ export class EngineRoom {
       entry.group.rotation.y += delta * 1.5;
     });
 
-    if (this.gateOpen && this.gateAnimT < 1) {
-      this.gateAnimT = Math.min(1, this.gateAnimT + delta * 0.8);
-      const t = this.gateAnimT;
+    if (this.sciFiDoorOpen && this.sciFiDoorAnimT < 1) {
+      this.sciFiDoorAnimT = Math.min(1, this.sciFiDoorAnimT + delta * 0.8);
+      const t = this.sciFiDoorAnimT;
       const eased = t * t * (3 - 2 * t);
-      if (this.gateDoor) {
-        this.gateDoor.position.y = -0.5 + eased * 3.0;
+      if (this.sciFiDoor) {
+        this.sciFiDoor.position.y = eased * 3.0;
       }
     }
 
-    if (this._transitionCallback && this.gateOpen && !this._transitionTriggered && window.__game?.player) {
+    if (this._transitionCallback && this.sciFiDoorOpen && !this._transitionTriggered && window.__game?.player) {
       const pPos = window.__game.player.camera.position;
-      if (pPos.z < -5.0) {
+      if (pPos.z < -11.0) {
         this._transitionTriggered = true;
         this._transitionCallback();
       }
@@ -576,10 +735,10 @@ export class EngineRoom {
     this.lights = [];
     this.flickerLights = [];
     this.interactiveObjects = [];
-    this.particles = null;
-    this.gateDoor = null;
-    this.gateOpen = false;
-    this.gateAnimT = 0;
+    this.colliders = [];
+    this.sciFiDoor = null;
+    this.sciFiDoorOpen = false;
+    this.sciFiDoorAnimT = 0;
     this._transitionCallback = null;
     this._transitionTriggered = false;
     this._pickupItems = [];
