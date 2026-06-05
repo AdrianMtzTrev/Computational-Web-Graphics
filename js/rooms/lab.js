@@ -50,15 +50,15 @@ export class LabRoom {
     this.objects.push(this.gateLasers);
 
     this.gateLasers.traverse(c => {
-      if (c.isMesh) {
-        const mat = c.material;
-        if (mat) {
-          const hasEmissive = mat.emissive && mat.emissive.getHex() !== 0x000000;
-          const isBright = mat.color && (mat.color.getHex() === 0xff0000 || mat.color.getHex() === 0x00ff00 || mat.color.getHex() === 0x00ffff);
-          if (hasEmissive || isBright) {
-            this.laserMeshes.push(c);
-          }
-        }
+      if (c.isMesh && c.name === 'lasers') {
+        c.material = new THREE.MeshStandardMaterial({
+          color: 0xff0000,
+          emissive: 0xff0000,
+          emissiveIntensity: 3.0,
+          transparent: true,
+          opacity: 0.8,
+        });
+        this.laserMeshes.push(c);
       }
     });
 
