@@ -95,20 +95,22 @@ export class LabRoom {
   }
 
   async _buildMoltenRoom(scene) {
-    const [floor, wall, doorWall] = await Promise.allSettled([
+    const [floor, wall, doorWall, ceilingTile, ceilingLight] = await Promise.allSettled([
       this._loadMolten('Floor_Metal_Square.glb'),
       this._loadMolten('Wall_Grey.glb'),
       this._loadMolten('Wall_With_Door_Grey.glb'),
+      this._loadMolten('Ceiling_Tile_Grey_Metal.glb'),
+      this._loadMolten('Ceiling_Light.glb'),
     ]);
 
     const setup = (obj) => {
       obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
     };
 
-    const cloneAt = (model, x, z, ry = 0) => {
+    const cloneAt = (model, x, z, ry = 0, y = 0) => {
       if (!model) return null;
       const c = model.clone();
-      c.position.set(x, 0, z);
+      c.position.set(x, y, z);
       c.rotation.y = ry;
       setup(c);
       scene.add(c);
@@ -149,6 +151,26 @@ export class LabRoom {
 
     // East wall (x = 10): 5 panels
     rowAtX(10, [-8, -4, 0, 4, 8]);
+
+    // Ceiling tiles (5x5 grid at y=4.0)
+    const ct = ceilingTile.status === 'fulfilled' ? ceilingTile.value : null;
+    if (ct) {
+      for (let ix = -8; ix <= 8; ix += 4) {
+        for (let iz = -8; iz <= 8; iz += 4) {
+          cloneAt(ct, ix, iz, 0, 4.0);
+        }
+      }
+    }
+
+    // Ceiling lights at corners + center
+    const cl = ceilingLight.status === 'fulfilled' ? ceilingLight.value : null;
+    if (cl) {
+      cloneAt(cl, -6, -6, 0, 3.85);
+      cloneAt(cl, 6, -6, 0, 3.85);
+      cloneAt(cl, -6, 6, 0, 3.85);
+      cloneAt(cl, 6, 6, 0, 3.85);
+      cloneAt(cl, 0, 0, 0, 3.85);
+    }
   }
 
   _buildTerminal(scene) {
@@ -332,7 +354,7 @@ export class LabRoom {
     scene.add(ambient);
     this.lights.push(ambient);
 
-    const positions = [[-6, 3.0, -6], [6, 3.0, -6], [-6, 3.0, 6], [6, 3.0, 6], [0, 3.5, 0]];
+    const positions = [[-6, 4.0, -6], [6, 4.0, -6], [-6, 4.0, 6], [6, 4.0, 6], [0, 4.0, 0]];
     positions.forEach(p => {
       const light = new THREE.PointLight(0xffffff, 1.5, 14);
       light.position.set(p[0], p[1], p[2]);
