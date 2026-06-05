@@ -5,6 +5,7 @@ import { HUD } from './hud.js';
 import { SceneManager } from './scene-manager.js';
 import { EngineRoom } from './rooms/engine-room.js';
 import { LabRoom } from './rooms/lab.js';
+import { BridgeRoom } from './rooms/bridge.js';
 
 export class Game {
   constructor() {
@@ -51,7 +52,13 @@ export class Game {
 
     this.labRoom = new LabRoom();
     this.sceneManager.registerRoom('lab', this.labRoom);
+
+    this.bridgeRoom = new BridgeRoom();
+    this.sceneManager.registerRoom('bridge', this.bridgeRoom);
+
     this.engineRoom.setTransitionCallback(() => this._transitionToLab());
+    this.labRoom.setTransitionCallback(() => this._transitionToBridge());
+    this.bridgeRoom.setTransitionCallback(() => this._onEscape());
     this._isTransitioning = false;
 
     this._onResize = () => {
@@ -177,6 +184,37 @@ export class Game {
     document.getElementById('loading-screen').classList.remove('active');
     this.isPaused = false;
     this._isTransitioning = false;
+  }
+
+  async _transitionToBridge() {
+    if (this._isTransitioning) return;
+    this._isTransitioning = true;
+    this.isPaused = true;
+
+    document.getElementById('loading-screen').classList.add('active');
+
+    await this.sceneManager.switchTo('bridge');
+    this.scene.add(this.player.flashlight);
+    this.scene.add(this.player.flashlightTarget);
+
+    const room = this.sceneManager.getCurrentRoom();
+    if (room) {
+      if (room.getColliders) this.player.setColliders(room.getColliders());
+    }
+
+    this.camera.position.set(0, 2, 7);
+    this.player.feetY = 0;
+
+    document.getElementById('loading-screen').classList.remove('active');
+    this.isPaused = false;
+    this._isTransitioning = false;
+  }
+
+  _onEscape() {
+    if (this._isTransitioning) return;
+    this._isTransitioning = true;
+    this.isPaused = true;
+    window.dispatchEvent(new CustomEvent('game-win'));
   }
 
   stop() {

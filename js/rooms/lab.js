@@ -25,6 +25,9 @@ export class LabRoom {
       { id: 'access_code', name: 'Código de Acceso', icon: '🔐' },
     ];
 
+    this._transitionCallback = null;
+    this._transitionTriggered = false;
+
     this.modularLoader = new GLTFLoader();
     this.modularLoader.setPath('assets/models/modular-space-kit/');
     this.modularLoader.setResourcePath('assets/models/modular-space-kit/Textures/');
@@ -466,6 +469,10 @@ export class LabRoom {
     return this.colliders;
   }
 
+  setTransitionCallback(cb) {
+    this._transitionCallback = cb;
+  }
+
   update(delta, time) {
     this.flickerLights.forEach(f => {
       const flicker = Math.sin(time * f.speed) * f.amplitude;
@@ -491,6 +498,14 @@ export class LabRoom {
       });
       if (this.gateAnimT >= 1) {
         this.laserMeshes.forEach(mesh => { mesh.visible = false; });
+      }
+    }
+
+    if (this._transitionCallback && this.gateOpen && !this._transitionTriggered && window.__game?.player) {
+      const pPos = window.__game.player.camera.position;
+      if (pPos.z < -10.5) {
+        this._transitionTriggered = true;
+        this._transitionCallback();
       }
     }
 
@@ -545,5 +560,7 @@ export class LabRoom {
     this.terminalGroup = null;
     this.terminalScreens = [];
     this.puzzleSolved = false;
+    this._transitionCallback = null;
+    this._transitionTriggered = false;
   }
 }
