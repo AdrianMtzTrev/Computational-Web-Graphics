@@ -35,12 +35,15 @@ export class LabRoom {
 
     this.moltenLoader = new GLTFLoader();
     this.moltenLoader.setPath('assets/models/molten-maps/');
+
+    this.sciFiLoader = new GLTFLoader();
   }
 
   async load(scene) {
     this.scene = scene;
 
     await this._buildMoltenRoom(scene);
+    await this._buildSciFiWalls(scene);
 
     const gate = await this._loadModular('gate-lasers.glb');
     this.gateLasers = gate;
@@ -94,11 +97,15 @@ export class LabRoom {
     });
   }
 
+  _loadSciFi(name) {
+    return new Promise(resolve => {
+      this.sciFiLoader.load('assets/models/sci-fi-series-a/' + name, gltf => resolve(gltf.scene), undefined, () => resolve(null));
+    });
+  }
+
   async _buildMoltenRoom(scene) {
-    const [floor, wall, doorWall, ceilingTile, ceilingLight] = await Promise.allSettled([
+    const [floor, ceilingTile, ceilingLight] = await Promise.allSettled([
       this._loadMolten('Floor_Metal_Square.glb'),
-      this._loadMolten('Wall_Grey.glb'),
-      this._loadMolten('Wall_With_Door_Grey.glb'),
       this._loadMolten('Ceiling_Tile_Grey_Metal.glb'),
       this._loadMolten('Ceiling_Light.glb'),
     ]);
@@ -128,30 +135,6 @@ export class LabRoom {
       }
     }
 
-    const w = wall.status === 'fulfilled' ? wall.value : null;
-    const dw = doorWall.status === 'fulfilled' ? doorWall.value : null;
-
-    if (!w && !dw) return;
-
-    // Helper to place wall row
-    const rowAtZ = (z, xs) => xs.forEach(x => cloneAt(w || dw, x, z, 0));
-    const rowAtX = (x, zs) => zs.forEach(z => cloneAt(w || dw, x, z, Math.PI / 2));
-
-    // North wall (z = 10): 5 panels
-    rowAtZ(10, [-8, -4, 0, 4, 8]);
-
-    // South wall (z = -10): 4 regular + 1 door wall centered at x=0
-    rowAtZ(-10, [-8, -4]);
-    if (dw) cloneAt(dw, 0, -10, 0);
-    else if (w) cloneAt(w, 0, -10, 0);
-    rowAtZ(-10, [4, 8]);
-
-    // West wall (x = -10): 5 panels
-    rowAtX(-10, [-8, -4, 0, 4, 8]);
-
-    // East wall (x = 10): 5 panels
-    rowAtX(10, [-8, -4, 0, 4, 8]);
-
     // Ceiling tiles (5x5 grid at y=4.0)
     const ct = ceilingTile.status === 'fulfilled' ? ceilingTile.value : null;
     if (ct) {
@@ -171,6 +154,66 @@ export class LabRoom {
       cloneAt(cl, 6, 6, 0, 3.85);
       cloneAt(cl, 0, 0, 0, 3.85);
     }
+  }
+
+  async _buildSciFiWalls(scene) {
+    const [wallV5, wallV4] = await Promise.allSettled([
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_001+_V2.0/Pack_SciFi_A_001_V2.0/02_EXPORT/OBJ/SM_Wall_V5.glb'),
+      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_001+_V2.0/Pack_SciFi_A_001_V2.0/02_EXPORT/OBJ/SM_Wall_V4.glb'),
+    ]);
+
+    const setup = (obj) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    };
+
+    const place = (model, x, z, ry, y = 1) => {
+      if (!model) return;
+      const c = model.clone();
+      c.position.set(x, y, z);
+      c.rotation.y = ry;
+      setup(c);
+      scene.add(c);
+      this.objects.push(c);
+    };
+
+    const w5 = wallV5.status === 'fulfilled' ? wallV5.value : null;
+    const w4 = wallV4.status === 'fulfilled' ? wallV4.value : null;
+    if (!w5) return;
+
+    const xs = [-9, -7, -5, -3, -1, 1, 3, 5, 7, 9];
+
+    // Build set of 1-2 random positions for V4 ventilation panels
+    const allKeys = [];
+    xs.forEach(x => {
+      allKeys.push(`n_${x}`);
+      if (x !== -1 && x !== 1) allKeys.push(`s_${x}`);
+      allKeys.push(`w_${x}`);
+      allKeys.push(`e_${x}`);
+    });
+    const shuffled = [...allKeys].sort(() => Math.random() - 0.5);
+    const numV4 = 1 + Math.floor(Math.random() * 2);
+    const v4Set = new Set(shuffled.slice(0, numV4));
+
+    const pick = (wall, x) => {
+      const m = v4Set.has(wall + '_' + x) && w4 ? w4 : w5;
+      return m;
+    };
+
+    // North wall (z=10)
+    xs.forEach(x => { place(pick('n', x), x, 10, Math.PI / 2, 1); place(pick('n', x), x, 10, Math.PI / 2, 3); });
+
+    // South wall (z=-10), skip center 2 panels for door gap
+    xs.forEach(x => {
+      if (x === -1 || x === 1) return;
+      place(pick('s', x), x, -10, -Math.PI / 2, 1);
+      place(pick('s', x), x, -10, -Math.PI / 2, 3);
+    });
+
+    // West wall (x=-10)
+    xs.forEach(z => { place(pick('w', z), -10, z, Math.PI, 1); place(pick('w', z), -10, z, Math.PI, 3); });
+
+    // East wall (x=10)
+    xs.forEach(z => { place(pick('e', z), 10, z, 0, 1); place(pick('e', z), 10, z, 0, 3); });
   }
 
   _buildTerminal(scene) {
@@ -403,9 +446,9 @@ export class LabRoom {
       new THREE.Box3(new THREE.Vector3(-10.2, 0, -10), new THREE.Vector3(-9.8, 4, 10)),
       new THREE.Box3(new THREE.Vector3(9.8, 0, -10), new THREE.Vector3(10.2, 4, 10)),
       new THREE.Box3(new THREE.Vector3(-10, 0, 9.8), new THREE.Vector3(10, 4, 10.2)),
-      // South wall — gap for door at x=0 (~1.6m wide)
-      new THREE.Box3(new THREE.Vector3(-10, 0, -10.2), new THREE.Vector3(-0.8, 4, -9.8)),
-      new THREE.Box3(new THREE.Vector3(0.8, 0, -10.2), new THREE.Vector3(10, 4, -9.8)),
+      // South wall — gap for door 4m (x=-2 to x=2)
+      new THREE.Box3(new THREE.Vector3(-10, 0, -10.2), new THREE.Vector3(-2, 4, -9.8)),
+      new THREE.Box3(new THREE.Vector3(2, 0, -10.2), new THREE.Vector3(10, 4, -9.8)),
     ];
   }
 
