@@ -463,12 +463,14 @@ export class BridgeRoom {
     }
 
     const required = ['nav_alpha', 'nav_beta', 'nav_gamma'];
+    window.__game?.sfx?.terminalBeep();
     const missing = required.filter(id => !player.hasItem(id));
 
     if (missing.length === 0) {
       required.forEach(id => player.removeItem(id));
       this._puzzleSolved = true;
       hud.showMessage('✅ COORDENADAS LISTAS — ESCAPE INICIADO', 4000);
+      window.__game?.sfx?.success();
       window.__game?.save();
       this._consoleScreens.forEach(s => {
         if (s.material) s.material.color.setHex(0x00ff88);
@@ -556,6 +558,7 @@ export class BridgeRoom {
 
     player.addItem({ id: entry.data.id, name: entry.data.name, icon: entry.data.icon });
     hud.showMessage(entry.data.hint, 2500);
+    window.__game?.sfx?.pickup();
 
     this.scene.remove(entry.group);
     const idx = this.objects.indexOf(entry.group);

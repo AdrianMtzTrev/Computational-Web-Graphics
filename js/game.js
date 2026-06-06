@@ -6,6 +6,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { Player } from './player.js';
 import { HUD } from './hud.js';
+import { SfxPlayer } from './sfx.js';
 import { SceneManager } from './scene-manager.js';
 import { EngineRoom } from './rooms/engine-room.js';
 import { LabRoom } from './rooms/lab.js';
@@ -92,6 +93,8 @@ export class Game {
       this.player.health = 1;
     }
     this.hud = new HUD();
+    this.sfx = new SfxPlayer();
+    this.player.setSfx(this.sfx);
     this.sceneManager = new SceneManager(this.scene);
 
     this.engineRoom = new EngineRoom();

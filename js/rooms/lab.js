@@ -488,6 +488,7 @@ export class LabRoom {
       return;
     }
 
+    window.__game?.sfx?.terminalBeep();
     const missing = this.requiredItems.filter(item => !player.hasItem(item.id));
 
     if (missing.length === 0) {
@@ -496,6 +497,7 @@ export class LabRoom {
       this.gateOpen = true;
       this.gateAnimT = 0;
       hud.showMessage('✅ MUESTRAS COMPLETAS — DESACTIVANDO BARRERA', 4000);
+      window.__game?.sfx?.success();
       window.__game?.save();
     } else {
       const names = missing.map(m => m.name).join(', ');
@@ -575,6 +577,7 @@ export class LabRoom {
 
     player.addItem({ id: entry.data.id, name: entry.data.name, icon: entry.data.icon });
     hud.showMessage(entry.data.hint, 2500);
+    window.__game?.sfx?.pickup();
 
     this.scene.remove(entry.group);
     const idx = this.objects.indexOf(entry.group);

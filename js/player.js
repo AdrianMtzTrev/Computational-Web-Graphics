@@ -58,6 +58,12 @@ export class Player {
     this.flashlightTarget.position.set(0, 0, -10);
     this.flashlight.target = this.flashlightTarget;
     this.flashlightOn = true;
+    this._sfx = null;
+    this._footstepAccum = 0;
+  }
+
+  setSfx(sfx) {
+    this._sfx = sfx;
   }
 
   setColliders(boxes) {
@@ -93,6 +99,14 @@ export class Player {
     let currentSpeed = this.speed;
     if (this.isRunning && !this.isCrouching) currentSpeed *= this.runMultiplier;
     if (this.isCrouching) currentSpeed *= this.crouchMultiplier;
+
+    if (this.isOnGround && moveDir.lengthSq() > 0) {
+      this._footstepAccum += delta * (this.isRunning ? 6 : 4);
+      if (this._footstepAccum > 1) {
+        this._footstepAccum = 0;
+        if (this._sfx) this._sfx.footstep();
+      }
+    }
 
     this.velocity.x = moveDir.x * currentSpeed;
     this.velocity.z = moveDir.z * currentSpeed;

@@ -530,6 +530,7 @@ export class EngineRoom {
       player.removeItem(required);
       puzzle.solved = true;
       hud.showMessage(`✅ ${puzzle.label}: ${puzzle.messageOn}`, 3000);
+      window.__game?.sfx?.terminalBeep();
 
       if (puzzle.id === 'power') {
         this._onPowerSolved();
@@ -550,6 +551,7 @@ export class EngineRoom {
     }
     const hud = window.__game?.hud;
     if (hud) hud.showMessage('⚡ REACTOR ACTIVADO — SISTEMAS CRÍTICOS ONLINE', 4000);
+    window.__game?.sfx?.powerUp();
     window.__game?.save();
   }
 
@@ -558,6 +560,7 @@ export class EngineRoom {
     this.sciFiDoorAnimT = 0;
     const hud = window.__game?.hud;
     if (hud) hud.showMessage('🚪 PUERTA ABIERTA — ACCESO AL CORREDOR', 4000);
+    window.__game?.sfx?.doorOpen();
     window.__game?.save();
   }
 
@@ -652,6 +655,7 @@ export class EngineRoom {
     }
 
     hud.showMessage(def.hint, 2500);
+    window.__game?.sfx?.pickup();
 
     this.scene.remove(entry.group);
     const objIdx = this.objects.indexOf(entry.group);
