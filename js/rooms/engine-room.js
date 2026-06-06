@@ -767,6 +767,43 @@ export class EngineRoom {
     this.particles.position.set(0, 0, 0.5);
     scene.add(this.particles);
     this.objects.push(this.particles);
+
+    // Spark particles — shower from ceiling
+    const sparkCount = 80;
+    const sparkPos = new Float32Array(sparkCount * 3);
+    this._sparkVelocities = [];
+    this._sparkLifetimes = new Float32Array(sparkCount);
+    for (let i = 0; i < sparkCount; i++) {
+      this._resetSpark(i);
+    }
+    const sparkGeo = new THREE.BufferGeometry();
+    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+    const sparkMat = new THREE.PointsMaterial({
+      color: 0xff8800,
+      size: 0.04,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true,
+    });
+    this._sparkParticles = new THREE.Points(sparkGeo, sparkMat);
+    this._sparkParticles.position.set(0, 0, 0.5);
+    scene.add(this._sparkParticles);
+    this.objects.push(this._sparkParticles);
+  }
+
+  _resetSpark(i) {
+    const pos = this._sparkParticles.geometry.attributes.position.array;
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * 3.0 + 0.5;
+    pos[i * 3] = Math.cos(angle) * radius;
+    pos[i * 3 + 1] = 2.5 + Math.random() * 1.2;
+    pos[i * 3 + 2] = Math.sin(angle) * radius;
+    const fallSpeed = Math.random() * 1.2 + 0.6;
+    const drift = (Math.random() - 0.5) * 0.5;
+    this._sparkVelocities[i] = { vx: drift, vy: -fallSpeed, vz: drift };
+    this._sparkLifetimes[i] = Math.random() * 0.5 + 0.3;
   }
 
   _setupAudio(scene) {
@@ -870,6 +907,24 @@ export class EngineRoom {
       }
       this.particles.geometry.attributes.position.needsUpdate = true;
     }
+
+    // Animate sparks
+    if (this._sparkParticles) {
+      const sparkPos = this._sparkParticles.geometry.attributes.position.array;
+      for (let i = 0; i < 80; i++) {
+        this._sparkLifetimes[i] -= delta;
+        if (this._sparkLifetimes[i] <= 0) {
+          this._resetSpark(i);
+        }
+        sparkPos[i * 3] += this._sparkVelocities[i].vx * delta;
+        sparkPos[i * 3 + 1] += this._sparkVelocities[i].vy * delta;
+        sparkPos[i * 3 + 2] += this._sparkVelocities[i].vz * delta;
+        if (sparkPos[i * 3 + 1] < 0) {
+          this._resetSpark(i);
+        }
+      }
+      this._sparkParticles.geometry.attributes.position.needsUpdate = true;
+    }
   }
 
   unload() {
@@ -910,5 +965,8 @@ export class EngineRoom {
     this._pickupItems = [];
     this._consoleGroups = [];
     this._consoleScreens = [];
+    this._sparkParticles = null;
+    this._sparkVelocities = [];
+    this._sparkLifetimes = null;
   }
 }

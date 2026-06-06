@@ -647,6 +647,40 @@ export class LabRoom {
     this.particles.position.set(0, 0, 0);
     scene.add(this.particles);
     this.objects.push(this.particles);
+
+    // Bubble particles — rise from glass container positions
+    const containerPositions = [
+      [-5.5, 8.8], [-4.5, 8.8], [5.5, 8.8], [4.5, 8.8], [-7.5, 9], [7.5, 9]
+    ];
+    const bubbleCount = 60;
+    const bubblePos = new Float32Array(bubbleCount * 3);
+    this._bubbleVelocities = [];
+    for (let i = 0; i < bubbleCount; i++) {
+      const cp = containerPositions[i % containerPositions.length];
+      bubblePos[i * 3] = cp[0] + (Math.random() - 0.5) * 0.4;
+      bubblePos[i * 3 + 1] = Math.random() * 0.6 + 0.2;
+      bubblePos[i * 3 + 2] = cp[1] + (Math.random() - 0.5) * 0.4;
+      this._bubbleVelocities.push({
+        vx: (Math.random() - 0.5) * 0.04,
+        vy: Math.random() * 0.2 + 0.1,
+        vz: (Math.random() - 0.5) * 0.04,
+      });
+    }
+    const bubbleGeo = new THREE.BufferGeometry();
+    bubbleGeo.setAttribute('position', new THREE.BufferAttribute(bubblePos, 3));
+    const bubbleMat = new THREE.PointsMaterial({
+      color: 0x88ddff,
+      size: 0.03,
+      transparent: true,
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true,
+    });
+    this._bubbleParticles = new THREE.Points(bubbleGeo, bubbleMat);
+    this._bubbleParticles.position.set(0, 0, 0);
+    scene.add(this._bubbleParticles);
+    this.objects.push(this._bubbleParticles);
   }
 
   _setupAudio(scene) {
@@ -754,6 +788,25 @@ export class LabRoom {
       }
       this.particles.geometry.attributes.position.needsUpdate = true;
     }
+
+    if (this._bubbleParticles) {
+      const bPos = this._bubbleParticles.geometry.attributes.position.array;
+      const containerPositions = [
+        [-5.5, 8.8], [-4.5, 8.8], [5.5, 8.8], [4.5, 8.8], [-7.5, 9], [7.5, 9]
+      ];
+      for (let i = 0; i < 60; i++) {
+        bPos[i * 3] += this._bubbleVelocities[i].vx * delta;
+        bPos[i * 3 + 1] += this._bubbleVelocities[i].vy * delta;
+        bPos[i * 3 + 2] += this._bubbleVelocities[i].vz * delta;
+        if (bPos[i * 3 + 1] > 0.9) {
+          const cp = containerPositions[i % containerPositions.length];
+          bPos[i * 3] = cp[0] + (Math.random() - 0.5) * 0.4;
+          bPos[i * 3 + 1] = 0.2;
+          bPos[i * 3 + 2] = cp[1] + (Math.random() - 0.5) * 0.4;
+        }
+      }
+      this._bubbleParticles.geometry.attributes.position.needsUpdate = true;
+    }
   }
 
   unload() {
@@ -792,6 +845,8 @@ export class LabRoom {
     this.puzzleSolved = false;
     this._transitionCallback = null;
     this._transitionTriggered = false;
+    this._bubbleParticles = null;
+    this._bubbleVelocities = [];
     if (this._onPause) window.removeEventListener('game-pause', this._onPause);
     if (this._onResume) window.removeEventListener('game-resume', this._onResume);
     if (this._ambientAudio) {

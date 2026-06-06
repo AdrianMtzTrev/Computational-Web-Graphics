@@ -621,6 +621,38 @@ export class BridgeRoom {
     this.particles.position.set(0, 0, 0);
     scene.add(this.particles);
     this.objects.push(this.particles);
+
+    // Data stream particles — flow from holo table outward
+    const dataCount = 150;
+    const dataPos = new Float32Array(dataCount * 3);
+    this._dataVelocities = [];
+    for (let i = 0; i < dataCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.random() * 1.5;
+      dataPos[i * 3] = Math.cos(angle) * dist;
+      dataPos[i * 3 + 1] = Math.random() * 2.0 + 0.5;
+      dataPos[i * 3 + 2] = Math.sin(angle) * dist;
+      this._dataVelocities.push({
+        vx: Math.cos(angle) * (0.2 + Math.random() * 0.3),
+        vy: Math.random() * 0.15 + 0.05,
+        vz: Math.sin(angle) * (0.2 + Math.random() * 0.3),
+      });
+    }
+    const dataGeo = new THREE.BufferGeometry();
+    dataGeo.setAttribute('position', new THREE.BufferAttribute(dataPos, 3));
+    const dataMat = new THREE.PointsMaterial({
+      color: 0x00ffcc,
+      size: 0.025,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true,
+    });
+    this._dataParticles = new THREE.Points(dataGeo, dataMat);
+    this._dataParticles.position.set(0, 0, 0);
+    scene.add(this._dataParticles);
+    this.objects.push(this._dataParticles);
   }
 
   _setupAudio(scene) {
@@ -721,6 +753,27 @@ export class BridgeRoom {
       this.particles.geometry.attributes.position.needsUpdate = true;
     }
 
+    if (this._dataParticles) {
+      const dPos = this._dataParticles.geometry.attributes.position.array;
+      for (let i = 0; i < 150; i++) {
+        dPos[i * 3] += this._dataVelocities[i].vx * delta;
+        dPos[i * 3 + 1] += this._dataVelocities[i].vy * delta;
+        dPos[i * 3 + 2] += this._dataVelocities[i].vz * delta;
+        const dx = dPos[i * 3], dz = dPos[i * 3 + 2];
+        if (dPos[i * 3 + 1] > 2.5 || Math.sqrt(dx * dx + dz * dz) > 2.0) {
+          const angle = Math.random() * Math.PI * 2;
+          const dist = Math.random() * 1.0;
+          dPos[i * 3] = Math.cos(angle) * dist;
+          dPos[i * 3 + 1] = 0.5;
+          dPos[i * 3 + 2] = Math.sin(angle) * dist;
+          this._dataVelocities[i].vx = Math.cos(angle) * (0.2 + Math.random() * 0.3);
+          this._dataVelocities[i].vy = Math.random() * 0.15 + 0.05;
+          this._dataVelocities[i].vz = Math.sin(angle) * (0.2 + Math.random() * 0.3);
+        }
+      }
+      this._dataParticles.geometry.attributes.position.needsUpdate = true;
+    }
+
     if (this._transitionCallback && this._puzzleSolved && !this._transitionTriggered && window.__game?.player) {
       const pPos = window.__game.player.camera.position;
       if (pPos.z > 9.0) {
@@ -760,6 +813,8 @@ export class BridgeRoom {
     this._consoleGroup = null;
     this._consoleScreens = [];
     this._puzzleSolved = false;
+    this._dataParticles = null;
+    this._dataVelocities = [];
     this._holoSphere = null;
     this._holoRing1 = null;
     this._holoRing2 = null;
