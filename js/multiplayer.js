@@ -3,6 +3,8 @@ import * as THREE from 'three';
 let socket = null;
 let connected = false;
 let otherPlayers = {};
+let _roomCode = '';
+let _playerCount = 0;
 
 export function connect(serverUrl) {
   return new Promise((resolve) => {
@@ -20,6 +22,8 @@ export function connect(serverUrl) {
       });
 
       socket.on('player-joined', (data) => {
+        _playerCount++;
+        window.dispatchEvent(new CustomEvent('mp-player-count', { detail: _playerCount }));
         if (!otherPlayers[data.id]) {
           const mat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.3 });
           const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.5, 0.3), mat);
@@ -34,6 +38,16 @@ export function connect(serverUrl) {
         if (otherPlayers[data.id]) {
           otherPlayers[data.id].pos.set(data.pos.x, data.pos.y, data.pos.z);
           otherPlayers[data.id].mesh.position.copy(otherPlayers[data.id].pos);
+        }
+      });
+
+      socket.on('player-left', (data) => {
+        _playerCount = Math.max(0, _playerCount - 1);
+        window.dispatchEvent(new CustomEvent('mp-player-count', { detail: _playerCount }));
+        const p = otherPlayers[data.id];
+        if (p) {
+          if (p.mesh.parent) p.mesh.parent.remove(p.mesh);
+          delete otherPlayers[data.id];
         }
       });
 
@@ -65,8 +79,17 @@ export function connect(serverUrl) {
 
 export function joinRoom(roomId) {
   if (socket && connected) {
+    _roomCode = roomId;
     socket.emit('join-room', roomId);
   }
+}
+
+export function getRoomCode() {
+  return _roomCode;
+}
+
+export function getPlayerCount() {
+  return _playerCount;
 }
 
 export function syncMove(pos, rot, room) {
@@ -95,6 +118,8 @@ export function disconnect() {
     if (p.mesh.parent) p.mesh.parent.remove(p.mesh);
   });
   otherPlayers = {};
+  _roomCode = '';
+  _playerCount = 0;
 }
 
 export function isConnected() {

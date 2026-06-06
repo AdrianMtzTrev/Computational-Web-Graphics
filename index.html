@@ -22,6 +22,7 @@
       <nav class="main-nav">
         <button class="btn btn-primary" id="btn-play">▶ JUGAR</button>
         <button class="btn btn-continue" id="btn-continue" style="display:none">↻ CONTINUAR</button>
+        <button class="btn btn-secondary" id="btn-multiplayer">🌐 MULTIJUGADOR</button>
         <button class="btn btn-secondary" id="btn-config">⚙ CONFIGURACIÓN</button>
         <button class="btn btn-secondary" id="btn-scores">★ PUNTUACIONES</button>
       </nav>
@@ -125,6 +126,36 @@
         </tbody>
       </table>
       <button class="btn btn-back" id="btn-scores-back">← VOLVER</button>
+    </div>
+  </div>
+
+  <!-- Multiplayer lobby -->
+  <div id="screen-multiplayer" class="screen">
+    <div class="scanlines"></div>
+    <div class="mp-content panel">
+      <h2 class="panel-title">🌐 MULTIJUGADOR</h2>
+
+      <div class="mp-status" id="mp-status">DESCONECTADO</div>
+
+      <div class="mp-section">
+        <label class="mp-label">CÓDIGO DE SALA</label>
+        <div class="mp-code-row">
+          <input type="text" id="mp-room-code" class="mp-input" placeholder="EJ: XK4Z" maxlength="10" autocomplete="off">
+          <button class="btn btn-secondary" id="mp-btn-join">UNIRSE</button>
+        </div>
+      </div>
+
+      <div class="mp-section">
+        <button class="btn btn-primary" id="mp-btn-create">CREAR SALA</button>
+      </div>
+
+      <div class="mp-play-row" id="mp-play-row" style="display:none">
+        <p class="mp-room-code-display">SALA: <span id="mp-room-code-display">---</span></p>
+        <p class="mp-players-display" id="mp-players-display">Jugadores: 1</p>
+        <button class="btn btn-primary" id="mp-btn-start">▶ INICIAR PARTIDA</button>
+      </div>
+
+      <button class="btn btn-back" id="btn-mp-back">← VOLVER</button>
     </div>
   </div>
 

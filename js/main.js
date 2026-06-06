@@ -1,6 +1,8 @@
 import { Game } from './game.js';
+import { connect, joinRoom, disconnect as mpDisconnect, isConnected, getRoomCode, getPlayerCount } from './multiplayer.js';
 
 let gameInstance = null;
+let _mpRoomCode = '';
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(function(s) {
@@ -81,6 +83,8 @@ function exitToMenu() {
     gameInstance = null;
     window.__game = null;
   }
+  mpDisconnect();
+  _mpRoomCode = '';
 // Show continue button if save exists
 try {
   if (localStorage.getItem('voidstation_save')) {
@@ -185,6 +189,22 @@ modeBtns.forEach(function(btn) {
   });
 });
 
+async function startMultiplayerGame() {
+  if (gameInstance) {
+    gameInstance.dispose();
+    gameInstance = null;
+    window.__game = null;
+    await new Promise(r => setTimeout(r, 150));
+  }
+  try { localStorage.removeItem('voidstation_save'); } catch (e) {}
+  gameInstance = new Game(getGameMode(), getDifficulty());
+  gameInstance._isMultiplayer = true;
+  window.__game = gameInstance;
+
+  showScreen('game');
+  await gameInstance.start();
+}
+
 document.getElementById('btn-play').addEventListener('click', startGame);
 document.getElementById('btn-continue').addEventListener('click', continueGame);
 document.getElementById('btn-config').addEventListener('click', function() { showScreen('config'); });
@@ -210,6 +230,92 @@ document.getElementById('btn-scores').addEventListener('click', function() {
 
 document.getElementById('btn-config-back').addEventListener('click', function() { showScreen('menu'); });
 document.getElementById('btn-scores-back').addEventListener('click', function() { showScreen('menu'); });
+
+// Multiplayer navigation
+document.getElementById('btn-multiplayer').addEventListener('click', function() {
+  showScreen('multiplayer');
+  _updateMpStatus();
+});
+
+document.getElementById('btn-mp-back').addEventListener('click', function() {
+  mpDisconnect();
+  _mpRoomCode = '';
+  showScreen('menu');
+});
+
+document.getElementById('mp-btn-create').addEventListener('click', async function() {
+  const statusEl = document.getElementById('mp-status');
+  const playRow = document.getElementById('mp-play-row');
+  statusEl.textContent = 'CONECTANDO...';
+  statusEl.className = 'mp-status';
+
+  const ok = await connect();
+  if (!ok) {
+    statusEl.textContent = 'ERROR DE CONEXIÓN';
+    statusEl.className = 'mp-status';
+    return;
+  }
+
+  statusEl.textContent = 'CONECTADO';
+  statusEl.className = 'mp-status connected';
+
+  const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+  _mpRoomCode = code;
+  joinRoom(code);
+
+  document.getElementById('mp-room-code-display').textContent = code;
+  document.getElementById('mp-players-display').textContent = 'Jugadores: 1';
+  playRow.style.display = 'flex';
+});
+
+document.getElementById('mp-btn-join').addEventListener('click', async function() {
+  const code = document.getElementById('mp-room-code').value.trim().toUpperCase();
+  if (!code) return;
+
+  const statusEl = document.getElementById('mp-status');
+  const playRow = document.getElementById('mp-play-row');
+  statusEl.textContent = 'CONECTANDO...';
+  statusEl.className = 'mp-status';
+
+  const ok = await connect();
+  if (!ok) {
+    statusEl.textContent = 'ERROR DE CONEXIÓN';
+    statusEl.className = 'mp-status';
+    return;
+  }
+
+  statusEl.textContent = 'CONECTADO';
+  statusEl.className = 'mp-status connected';
+
+  _mpRoomCode = code;
+  joinRoom(code);
+
+  document.getElementById('mp-room-code-display').textContent = code;
+  document.getElementById('mp-players-display').textContent = 'Jugadores: ' + getPlayerCount();
+  playRow.style.display = 'flex';
+});
+
+document.getElementById('mp-btn-start').addEventListener('click', startMultiplayerGame);
+
+window.addEventListener('mp-player-count', function(e) {
+  document.getElementById('mp-players-display').textContent = 'Jugadores: ' + e.detail;
+});
+
+function _updateMpStatus() {
+  const playRow = document.getElementById('mp-play-row');
+  const statusEl = document.getElementById('mp-status');
+  if (isConnected()) {
+    statusEl.textContent = 'CONECTADO';
+    statusEl.className = 'mp-status connected';
+    document.getElementById('mp-room-code-display').textContent = getRoomCode();
+    document.getElementById('mp-players-display').textContent = 'Jugadores: ' + getPlayerCount();
+    playRow.style.display = 'flex';
+  } else {
+    statusEl.textContent = 'DESCONECTADO';
+    statusEl.className = 'mp-status';
+    playRow.style.display = 'none';
+  }
+}
 
 document.getElementById('btn-resume').addEventListener('click', resumeGame);
 document.getElementById('btn-restart').addEventListener('click', startGame);

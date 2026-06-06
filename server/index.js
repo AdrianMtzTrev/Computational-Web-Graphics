@@ -78,7 +78,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    // notify rooms
+    for (const room of socket.rooms) {
+      if (room !== socket.id) {
+        socket.to(room).emit('player-left', { id: socket.id });
+      }
+    }
   });
 });
 

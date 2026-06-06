@@ -11,6 +11,7 @@ import { SceneManager } from './scene-manager.js';
 import { EngineRoom } from './rooms/engine-room.js';
 import { LabRoom } from './rooms/lab.js';
 import { BridgeRoom } from './rooms/bridge.js';
+import { syncMove, isConnected } from './multiplayer.js';
 
 export class Game {
   constructor(mode = 'story', difficulty = 'easy') {
@@ -21,6 +22,8 @@ export class Game {
     this.isPaused = false;
     this._deathTriggered = false;
     this._volume = 0.5;
+    this._isMultiplayer = false;
+    this._lastSyncTime = 0;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -355,6 +358,7 @@ export class Game {
 
   stop() {
     this.isRunning = false;
+    this._isMultiplayer = false;
     this.controls.unlock();
     this.controls.removeEventListener('unlock', this._onUnlock);
     document.removeEventListener('keydown', this._onKeyDown);
@@ -393,6 +397,18 @@ export class Game {
       this.sceneManager.update(delta, this.clock.elapsedTime);
       this.hud.update(this.player);
       this.composer.render();
+
+      if (this._isMultiplayer && isConnected()) {
+        const now = performance.now();
+        if (now - this._lastSyncTime > 50) {
+          this._lastSyncTime = now;
+          syncMove(
+            { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
+            { x: 0, y: this.camera.rotation.y, z: 0 },
+            this.sceneManager.currentRoomId
+          );
+        }
+      }
 
       if (this.player.feetY < -10) this.player.health = 0;
       if (this.player.health <= 0 && !this._deathTriggered) {

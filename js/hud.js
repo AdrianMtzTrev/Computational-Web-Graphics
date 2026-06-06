@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getRoomCode, getPlayerCount } from './multiplayer.js';
 
 export class HUD {
   constructor() {
@@ -20,6 +21,7 @@ export class HUD {
       <div id="hud-objective"></div>
       <div id="hud-message"></div>
       <div id="hud-flashlight">🔦</div>
+      <div id="hud-mp-info" style="display:none"></div>
       <div id="hud-debug" style="display:none"></div>
     `;
 
@@ -32,6 +34,7 @@ export class HUD {
     this.flashlightEl = document.getElementById('hud-flashlight');
     this.roomNameEl = document.getElementById('hud-room-name');
     this.objectiveEl = document.getElementById('hud-objective');
+    this.mpInfoEl = document.getElementById('hud-mp-info');
     this.debugEl = document.getElementById('hud-debug');
     this._debugVisible = false;
     this._fpsFrames = 0;
@@ -148,6 +151,14 @@ export class HUD {
         transition: opacity 0.3s ease;
       }
       #hud-flashlight.on { opacity: 1; }
+      #hud-mp-info {
+        position: absolute; top: 76px; right: 18px;
+        color: #2ecc71;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-align: right;
+        text-shadow: 0 0 8px rgba(46, 204, 113, 0.3);
+      }
       #hud-debug {
         position: absolute; top: 10px; left: 10px;
         background: rgba(0,0,0,0.7);
@@ -191,7 +202,15 @@ export class HUD {
       this.healthFill.style.background = 'linear-gradient(90deg, #c0392b, #e74c3c)';
     }
 
-    const roomId = window.__game?.sceneManager?.currentRoomId;
+    const game = window.__game;
+    if (game?._isMultiplayer) {
+      this.mpInfoEl.style.display = 'block';
+      this.mpInfoEl.textContent = 'SALA ' + (getRoomCode() || '---') + '  ·  ' + (getPlayerCount() || 1) + ' jug';
+    } else {
+      this.mpInfoEl.style.display = 'none';
+    }
+
+    const roomId = game?.sceneManager?.currentRoomId;
     if (roomId) {
       this.roomNameEl.textContent = this._roomLabels[roomId] || roomId.toUpperCase();
       this.objectiveEl.textContent = this._roomObjectives[roomId] || '';
