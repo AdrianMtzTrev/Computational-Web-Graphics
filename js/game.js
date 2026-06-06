@@ -28,7 +28,15 @@ export class Game {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.9;
+    this.renderer.toneMappingExposure = 1.2;
+
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x000000);
+    this.scene.fog = new THREE.Fog(0x050510, 8, 20);
+
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
+    this.camera.position.set(2.0, 1.7, 5);
+    this.camera.lookAt(0, 1, 0);
 
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
@@ -42,8 +50,8 @@ export class Game {
     const vignetteShader = {
       uniforms: {
         tDiffuse: { value: null },
-        offset: { value: 0.95 },
-        darkness: { value: 0.6 },
+        offset: { value: 0.85 },
+        darkness: { value: 0.35 },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -77,14 +85,6 @@ export class Game {
     this.renderer.domElement.addEventListener('webglcontextrestored', () => {
       this.isRunning = true;
     }, false);
-
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000000);
-    this.scene.fog = new THREE.Fog(0x050510, 6, 16);
-
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-    this.camera.position.set(2.0, 1.7, 5);
-    this.camera.lookAt(0, 1, 0);
 
     this.controls = new PointerLockControls(this.camera, this.renderer.domElement);
 

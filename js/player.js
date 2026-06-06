@@ -53,7 +53,7 @@ export class Player {
     document.addEventListener('keydown', this._onKeyDown);
     document.addEventListener('keyup', this._onKeyUp);
 
-    this.flashlight = new THREE.SpotLight(0xeeeeff, 5.0, 20, Math.PI / 5, 0.5, 2);
+    this.flashlight = new THREE.SpotLight(0xeeeeff, 20.0, 25, Math.PI / 4, 0.4, 1.5);
     this.flashlightTarget = new THREE.Object3D();
     this.flashlightTarget.position.set(0, 0, -10);
     this.flashlight.target = this.flashlightTarget;
