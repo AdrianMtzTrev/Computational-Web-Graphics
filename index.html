@@ -59,11 +59,10 @@
       </div>
 
       <div class="config-section">
-        <h3 class="section-title">DIFICULTAD</h3>
+        <h3 class="section-title">MODO DE JUEGO</h3>
         <div class="difficulty-selector">
-          <button class="diff-btn" data-diff="easy">FÁCIL</button>
-          <button class="diff-btn active" data-diff="normal">NORMAL</button>
-          <button class="diff-btn" data-diff="hard">DIFÍCIL</button>
+          <button class="mode-btn active" data-mode="story">HISTORIA</button>
+          <button class="mode-btn" data-mode="nodamage">NO DAÑO</button>
         </div>
       </div>
 
@@ -157,6 +156,21 @@
         </p>
         <button class="btn btn-primary" id="btn-win-restart">▶ JUGAR DE NUEVO</button>
         <button class="btn btn-danger" id="btn-win-menu">SALIR AL MENÚ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Death screen -->
+  <div id="screen-death" class="screen" style="display:none">
+    <div class="pause-overlay" style="background:rgba(80,0,0,0.7)">
+      <div class="pause-panel">
+        <h2 class="pause-title" style="color:#ff3333">— HAS MUERTO —</h2>
+        <p style="color:#ff6666;margin:16px 0;font-family:monospace;font-size:14px">
+          UN SOLO GOLPE Y CAÍSTE.<br>
+          LA ESTACIÓN RECLAMA OTRA VÍCTIMA.
+        </p>
+        <button class="btn btn-primary" id="btn-death-retry">⟳ REINTENTAR</button>
+        <button class="btn btn-danger" id="btn-death-menu">SALIR AL MENÚ</button>
       </div>
     </div>
   </div>

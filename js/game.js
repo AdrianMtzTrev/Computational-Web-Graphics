@@ -8,10 +8,12 @@ import { LabRoom } from './rooms/lab.js';
 import { BridgeRoom } from './rooms/bridge.js';
 
 export class Game {
-  constructor() {
+  constructor(mode = 'story') {
+    this.mode = mode;
     this.clock = new THREE.Clock();
     this.isRunning = false;
     this.isPaused = false;
+    this._deathTriggered = false;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -44,6 +46,10 @@ export class Game {
     this.controls = new PointerLockControls(this.camera, this.renderer.domElement);
 
     this.player = new Player(this.camera, this.controls);
+    if (this.mode === 'nodamage') {
+      this.player.maxHealth = 1;
+      this.player.health = 1;
+    }
     this.hud = new HUD();
     this.sceneManager = new SceneManager(this.scene);
 
@@ -256,6 +262,16 @@ export class Game {
       this.sceneManager.update(delta, this.clock.elapsedTime);
       this.hud.update(this.player);
       this.renderer.render(this.scene, this.camera);
+
+      if (this.mode === 'nodamage') {
+        if (this.player.feetY < -10) this.player.health = 0;
+        if (this.player.health <= 0 && !this._deathTriggered) {
+          this._deathTriggered = true;
+          this.isPaused = true;
+          this.controls.unlock();
+          window.dispatchEvent(new CustomEvent('game-death'));
+        }
+      }
     }
   }
 }

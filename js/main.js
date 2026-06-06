@@ -9,6 +9,11 @@ function showScreen(id) {
   document.getElementById('screen-' + id).classList.add('active');
 }
 
+function getGameMode() {
+  const active = document.querySelector('.mode-btn.active');
+  return active ? active.dataset.mode : 'story';
+}
+
 async function startGame() {
   if (gameInstance) {
     gameInstance.dispose();
@@ -16,7 +21,7 @@ async function startGame() {
     window.__game = null;
     await new Promise(r => setTimeout(r, 150));
   }
-  gameInstance = new Game();
+  gameInstance = new Game(getGameMode());
   window.__game = gameInstance;
 
   showScreen('game');
@@ -80,6 +85,15 @@ window.addEventListener('game-win', function() {
   showScreen('win');
 });
 
+window.addEventListener('game-death', function() {
+  var hud = document.getElementById('game-hud');
+  if (hud) hud.style.display = 'none';
+  showScreen('death');
+});
+
+document.getElementById('btn-death-retry').addEventListener('click', startGame);
+document.getElementById('btn-death-menu').addEventListener('click', exitToMenu);
+
 document.getElementById('btn-win-restart').addEventListener('click', startGame);
 document.getElementById('btn-win-menu').addEventListener('click', exitToMenu);
 
@@ -101,6 +115,14 @@ var diffBtns = document.querySelectorAll('.diff-btn');
 diffBtns.forEach(function(btn) {
   btn.addEventListener('click', function() {
     diffBtns.forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+
+var modeBtns = document.querySelectorAll('.mode-btn');
+modeBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    modeBtns.forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
   });
 });

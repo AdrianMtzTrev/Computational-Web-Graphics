@@ -508,6 +508,14 @@ export class LabRoom {
       }
     }
 
+    // Gate lasers deal damage in nodamage mode
+    if (!this.gateOpen && window.__game?.player && window.__game?.mode === 'nodamage') {
+      const pPos = window.__game.player.camera.position;
+      if (pPos.z < -9.8 && pPos.x > -2 && pPos.x < 2) {
+        window.__game.player.health = 0;
+      }
+    }
+
     if (this.particles) {
       const positions = this.particles.geometry.attributes.position.array;
       for (let i = 0; i < positions.length / 3; i++) {
