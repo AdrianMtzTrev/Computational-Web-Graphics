@@ -47,6 +47,7 @@ export class LabRoom {
     await this._buildMoltenRoom(scene);
     await this._buildSciFiWalls(scene);
     await this._buildDecorations(scene);
+    this._buildFurniture(scene);
 
     const gate = await this._loadModular('gate-lasers.glb');
     this.gateLasers = gate;
@@ -252,7 +253,7 @@ export class LabRoom {
     const tp = techPanel.status === 'fulfilled' ? techPanel.value : null;
     const bs = briefingScreen.status === 'fulfilled' ? briefingScreen.value : null;
 
-    if (bs) place(bs, 0, 10.05, Math.PI / 2, 2);
+    if (bs) place(bs, 0, 9.3, Math.PI, 0);
 
     if (tp) {
       place(tp, -6, 10.05, Math.PI / 2);
@@ -262,6 +263,158 @@ export class LabRoom {
       place(tp, -10.05, -5, Math.PI);
       place(tp, -10.05, 5, Math.PI);
     }
+  }
+
+  _buildFurniture(scene) {
+    const SCALE = 1.3;
+    const tableMat = new THREE.MeshStandardMaterial({ color: 0x3a4a5a, metalness: 0.4, roughness: 0.6 });
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, metalness: 0.5, roughness: 0.3 });
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0x4a5a6a, metalness: 0.3, roughness: 0.7 });
+    const cabMat = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, metalness: 0.5, roughness: 0.4 });
+    const doorMat = new THREE.MeshStandardMaterial({ color: 0x1a2a3a, metalness: 0.6, roughness: 0.3 });
+
+    const scaled = (v) => v * SCALE;
+
+    const collider = (min, max) => {
+      this.colliders.push(new THREE.Box3(
+        new THREE.Vector3(min[0], min[1], min[2]),
+        new THREE.Vector3(max[0], max[1], max[2])
+      ));
+    };
+
+    const makeContainer = (x, y, z, ry) => {
+      const c = new THREE.Group();
+      c.position.set(x, y || 0, z);
+      if (ry) c.rotation.y = ry;
+      const g = new THREE.Group();
+      g.scale.set(SCALE, SCALE, SCALE);
+      c.add(g);
+      scene.add(c);
+      this.objects.push(c);
+      return g;
+    };
+
+    const table = (x, z, ry) => {
+      const g = makeContainer(x, 0, z, ry);
+      const top = new THREE.Mesh(new THREE.BoxGeometry(scaled(2), scaled(0.06), scaled(0.9)), tableMat);
+      top.position.y = scaled(0.75); top.castShadow = true; top.receiveShadow = true; g.add(top);
+      [[-0.85, -0.35], [-0.85, 0.35], [0.85, -0.35], [0.85, 0.35]].forEach(([lx, lz]) => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(scaled(0.03), scaled(0.03), scaled(0.72), 6), legMat);
+        leg.position.set(scaled(lx), scaled(0.36), scaled(lz)); g.add(leg);
+      });
+      const lowerMat = new THREE.MeshStandardMaterial({ color: 0x2a3a4a, metalness: 0.3, roughness: 0.5, transparent: true, opacity: 0.6 });
+      const lower = new THREE.Mesh(new THREE.BoxGeometry(scaled(1.6), scaled(0.03), scaled(0.7)), lowerMat);
+      lower.position.y = scaled(0.15); g.add(lower);
+      collider([x - scaled(1), 0, z - scaled(0.5)], [x + scaled(1), scaled(0.8), z + scaled(0.5)]);
+    };
+
+    const chair = (x, z, ry) => {
+      const g = makeContainer(x, 0, z, ry);
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.4), scaled(0.04), scaled(0.4)), chairMat);
+      seat.position.y = scaled(0.45); seat.castShadow = true; g.add(seat);
+      const back = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.4), scaled(0.35), scaled(0.03)), chairMat);
+      back.position.set(0, scaled(0.65), scaled(-0.22)); g.add(back);
+      [[-0.16, -0.16], [-0.16, 0.16], [0.16, -0.16], [0.16, 0.16]].forEach(([lx, lz]) => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(scaled(0.02), scaled(0.02), scaled(0.42), 4), legMat);
+        leg.position.set(scaled(lx), scaled(0.21), scaled(lz)); g.add(leg);
+      });
+      collider([x - scaled(0.25), 0, z - scaled(0.25)], [x + scaled(0.25), scaled(0.7), z + scaled(0.25)]);
+    };
+
+    const equipment = (x, z, color, emissiveColor) => {
+      const g = makeContainer(x, scaled(0.85), z);
+      const bodyMat = new THREE.MeshPhongMaterial({ color, emissive: emissiveColor || color, emissiveIntensity: 0.05, metalness: 0.3, roughness: 0.5 });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.3), scaled(0.15), scaled(0.2)), bodyMat);
+      body.castShadow = true; g.add(body);
+      const screenMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(scaled(0.12), scaled(0.08)), screenMat);
+      screen.position.set(0, scaled(0.1), scaled(-0.11)); g.add(screen);
+      const topMat = new THREE.MeshPhongMaterial({ color: emissiveColor || color, emissive: emissiveColor || color, emissiveIntensity: 0.3 });
+      const detail = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.06), scaled(0.02), scaled(0.06)), topMat);
+      detail.position.set(0, scaled(0.1), 0); g.add(detail);
+    };
+
+    const glassContainer = (x, z, s) => {
+      const scale = (s || 1);
+      const g = makeContainer(x, 0, z);
+      const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x88ddff, transparent: true, opacity: 0.25, metalness: 0, roughness: 0.05, side: THREE.DoubleSide });
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(scaled(0.15 * scale), scaled(0.12 * scale), scaled(0.5 * scale), 10), glassMat);
+      tube.position.y = scaled(0.25 * scale); tube.castShadow = true; g.add(tube);
+      const liquidMat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.15, transparent: true, opacity: 0.5 });
+      const liquid = new THREE.Mesh(new THREE.CylinderGeometry(scaled(0.1 * scale), scaled(0.08 * scale), scaled(0.25 * scale), 10), liquidMat);
+      liquid.position.y = scaled(0.15 * scale); g.add(liquid);
+      collider([x - scaled(0.15 * scale), 0, z - scaled(0.15 * scale)], [x + scaled(0.15 * scale), scaled(0.5 * scale), z + scaled(0.15 * scale)]);
+    };
+
+    const shelf = (x, z, ry, height) => {
+      const g = makeContainer(x, height || 2, z, ry);
+      const plank = new THREE.Mesh(new THREE.BoxGeometry(scaled(1.2), scaled(0.04), scaled(0.3)), new THREE.MeshStandardMaterial({ color: 0x3a4a5a, metalness: 0.3, roughness: 0.5 }));
+      g.add(plank);
+    };
+
+    const cabinet = (x, z, ry) => {
+      const g = makeContainer(x, 0, z, ry);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.8), scaled(1.8), scaled(0.6)), cabMat);
+      body.position.y = scaled(0.9); body.castShadow = true; body.receiveShadow = true; g.add(body);
+      const d1 = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.35), scaled(1.4), scaled(0.02)), doorMat);
+      d1.position.set(scaled(-0.2), scaled(0.9), scaled(0.31)); g.add(d1);
+      const d2 = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.35), scaled(1.4), scaled(0.02)), doorMat);
+      d2.position.set(scaled(0.2), scaled(0.9), scaled(0.31)); g.add(d2);
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.84), scaled(0.04), scaled(0.64)), doorMat);
+      trim.position.y = scaled(1.8); g.add(trim);
+      collider([x - scaled(0.4), 0, z - scaled(0.3)], [x + scaled(0.4), scaled(1.8), z + scaled(0.3)]);
+    };
+
+    const wallScreen = (x, z, ry, height) => {
+      const g = makeContainer(x, height || 1.2, z, ry);
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.6, roughness: 0.3 });
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.4), scaled(0.3), scaled(0.04)), frameMat);
+      g.add(frame);
+      const scrMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+      const scr = new THREE.Mesh(new THREE.PlaneGeometry(scaled(0.34), scaled(0.24)), scrMat);
+      scr.position.z = scaled(0.03); g.add(scr);
+    };
+
+    // East wall area
+    table(8, 5);
+    equipment(8.5, 5, 0x44aaff, 0x4488ff);
+    equipment(7.3, 5, 0xff6644, 0xff8844);
+    chair(8, 6.5, Math.PI);
+    table(8, -2);
+    equipment(8.45, -2, 0x88ff44, 0x44ff88);
+    equipment(7.5, -2, 0xaa44ff, 0xcc44ff);
+    chair(8, -0.5, Math.PI);
+    wallScreen(8.9, 2.5, 0, 1.5);
+
+    // West wall area
+    table(-8, 4);
+    equipment(-8.5, 4, 0xaa44ff, 0xcc44ff);
+    equipment(-7.3, 4, 0x44ffaa, 0x44ff88);
+    chair(-8, 5.5, Math.PI);
+    table(-8, -3);
+    equipment(-8.45, -3, 0xff8844, 0xffaa44);
+    equipment(-7.5, -3, 0x4488ff, 0x44aaff);
+    chair(-8, -1.5, Math.PI);
+    wallScreen(-8.9, 2.5, Math.PI, 1.5);
+
+    // North wall — shelves with glass containers
+    shelf(-5, 9.2, Math.PI / 2, 1.8);
+    glassContainer(-5.5, 8.8, 0.9);
+    glassContainer(-4.5, 8.8, 0.7);
+    shelf(5, 9.2, Math.PI / 2, 1.8);
+    glassContainer(5.5, 8.8, 0.9);
+    glassContainer(4.5, 8.8, 0.7);
+
+    glassContainer(-7.5, 9, 0.8);
+    glassContainer(7.5, 9, 0.8);
+    wallScreen(-3, 9.2, Math.PI / 2, 1.3);
+    wallScreen(3, 9.2, Math.PI / 2, 1.3);
+
+    // Cabinets in corners
+    cabinet(-9, 8, Math.PI / 2);
+    cabinet(9, 8, -Math.PI / 2);
+    cabinet(-9, -7, Math.PI / 2);
+    cabinet(9, -7, -Math.PI / 2);
   }
 
   _buildTerminal(scene) {
