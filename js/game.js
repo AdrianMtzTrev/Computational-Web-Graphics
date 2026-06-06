@@ -13,8 +13,9 @@ import { LabRoom } from './rooms/lab.js';
 import { BridgeRoom } from './rooms/bridge.js';
 
 export class Game {
-  constructor(mode = 'story') {
+  constructor(mode = 'story', difficulty = 'easy') {
     this.mode = mode;
+    this.difficulty = difficulty;
     this.clock = new THREE.Clock();
     this.isRunning = false;
     this.isPaused = false;
@@ -91,6 +92,12 @@ export class Game {
     if (this.mode === 'nodamage') {
       this.player.maxHealth = 1;
       this.player.health = 1;
+    } else if (this.difficulty === 'hard') {
+      this.player.maxHealth = 75;
+      this.player.health = 75;
+    } else {
+      this.player.maxHealth = 150;
+      this.player.health = 150;
     }
     this.hud = new HUD();
     this.sfx = new SfxPlayer();
@@ -254,6 +261,7 @@ export class Game {
     const player = this.player;
     const data = {
       mode: this.mode,
+      difficulty: this.difficulty,
       currentRoom: this.sceneManager.currentRoomId,
       inventory: player.inventory.map(i => ({ id: i.id, name: i.name, icon: i.icon })),
       puzzles: {

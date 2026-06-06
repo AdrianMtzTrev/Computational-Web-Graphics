@@ -14,6 +14,11 @@ function getGameMode() {
   return active ? active.dataset.mode : 'story';
 }
 
+function getDifficulty() {
+  const active = document.querySelector('.diff-btn.active');
+  return active ? active.dataset.diff : 'easy';
+}
+
 async function startGame() {
   if (gameInstance) {
     gameInstance.dispose();
@@ -22,7 +27,7 @@ async function startGame() {
     await new Promise(r => setTimeout(r, 150));
   }
   try { localStorage.removeItem('voidstation_save'); } catch (e) {}
-  gameInstance = new Game(getGameMode());
+  gameInstance = new Game(getGameMode(), getDifficulty());
   window.__game = gameInstance;
 
   showScreen('game');
@@ -44,7 +49,8 @@ async function continueGame() {
   if (!saveData) return;
 
   var mode = saveData.mode || 'story';
-  gameInstance = new Game(mode);
+  var diff = saveData.difficulty || 'easy';
+  gameInstance = new Game(mode, diff);
   window.__game = gameInstance;
 
   showScreen('game');

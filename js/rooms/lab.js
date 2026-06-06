@@ -769,10 +769,14 @@ export class LabRoom {
     }
 
     // Gate lasers deal damage in nodamage mode
-    if (!this.gateOpen && window.__game?.player && window.__game?.mode === 'nodamage') {
+    if (!this.gateOpen && window.__game?.player && (window.__game?.mode === 'nodamage' || window.__game?.difficulty === 'hard')) {
       const pPos = window.__game.player.camera.position;
       if (pPos.z < -9.8 && pPos.x > -2 && pPos.x < 2) {
-        window.__game.player.health = 0;
+        if (window.__game?.mode === 'nodamage') {
+          window.__game.player.health = 0;
+        } else {
+          window.__game.player.takeDamage(15 * delta);
+        }
       }
     }
 
