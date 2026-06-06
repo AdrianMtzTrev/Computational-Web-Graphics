@@ -16,6 +16,8 @@ export class HUD {
         Presiona <kbd>E</kbd> para interactuar
       </div>
       <div id="hud-inventory"></div>
+      <div id="hud-room-name"></div>
+      <div id="hud-objective"></div>
       <div id="hud-message"></div>
       <div id="hud-flashlight">🔦</div>
       <div id="hud-debug" style="display:none"></div>
@@ -28,6 +30,8 @@ export class HUD {
     this.inventoryEl = document.getElementById('hud-inventory');
     this.messageEl = document.getElementById('hud-message');
     this.flashlightEl = document.getElementById('hud-flashlight');
+    this.roomNameEl = document.getElementById('hud-room-name');
+    this.objectiveEl = document.getElementById('hud-objective');
     this.debugEl = document.getElementById('hud-debug');
     this._debugVisible = false;
     this._fpsFrames = 0;
@@ -106,6 +110,24 @@ export class HUD {
         text-align: center;
         letter-spacing: 0.05em;
       }
+      #hud-room-name {
+        position: absolute; top: 18px; left: 50%;
+        transform: translateX(-50%);
+        color: #00d4ff;
+        font-size: 13px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        text-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+        opacity: 0.6;
+      }
+      #hud-objective {
+        position: absolute; top: 42px; left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255,255,255,0.4);
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-align: center;
+      }
       #hud-message {
         position: absolute; top: 15%; left: 50%;
         transform: translateX(-50%);
@@ -143,10 +165,37 @@ export class HUD {
     document.head.appendChild(style);
   }
 
+  _roomLabels = {
+    engine: 'SALA DE MÁQUINAS',
+    lab: 'LABORATORIO',
+    bridge: 'PUENTE DE MANDO',
+  };
+
+  _roomObjectives = {
+    engine: 'ACTIVA EL REACTOR Y ABRE LA PUERTA',
+    lab: 'RECOLECTA 3 MUESTRAS Y DESACTIVA LA BARRERA',
+    bridge: 'RECOPILA DATOS DE NAVEGACIÓN Y ESCAPA',
+  };
+
   update(player) {
     const pct = (player.health / player.maxHealth) * 100;
     this.healthFill.style.width = pct + '%';
     this.healthText.textContent = Math.round(player.health);
+
+    // Health bar color
+    if (pct > 60) {
+      this.healthFill.style.background = 'linear-gradient(90deg, #27ae60, #2ecc71)';
+    } else if (pct > 30) {
+      this.healthFill.style.background = 'linear-gradient(90deg, #e67e22, #f39c12)';
+    } else {
+      this.healthFill.style.background = 'linear-gradient(90deg, #c0392b, #e74c3c)';
+    }
+
+    const roomId = window.__game?.sceneManager?.currentRoomId;
+    if (roomId) {
+      this.roomNameEl.textContent = this._roomLabels[roomId] || roomId.toUpperCase();
+      this.objectiveEl.textContent = this._roomObjectives[roomId] || '';
+    }
 
     const lookingAt = player.getLookingAt();
     this.interactEl.style.display = lookingAt ? 'block' : 'none';
