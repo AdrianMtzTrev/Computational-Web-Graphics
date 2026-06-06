@@ -328,7 +328,7 @@ export class LabRoom {
 
     const equipment = (x, z, color, emissiveColor) => {
       const g = makeContainer(x, 0.855 * SCALE * SCALE + 0.03 * SCALE, z);
-      const bodyMat = new THREE.MeshPhongMaterial({ color, emissive: emissiveColor || color, emissiveIntensity: 0.05, metalness: 0.3, roughness: 0.5 });
+      const bodyMat = new THREE.MeshStandardMaterial({ color, emissive: emissiveColor || color, emissiveIntensity: 0.05, metalness: 0.3, roughness: 0.5 });
       const body = new THREE.Mesh(new THREE.BoxGeometry(scaled(0.3), scaled(0.15), scaled(0.2)), bodyMat);
       body.castShadow = true; g.add(body);
       const screenMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa });

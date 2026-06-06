@@ -5,7 +5,11 @@ const cors = require('cors');
 const { getDb, initDb } = require('./db');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+    : '*',
+}));
 app.use(express.json());
 
 const server = http.createServer(app);

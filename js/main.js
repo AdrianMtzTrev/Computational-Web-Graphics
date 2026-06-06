@@ -151,16 +151,8 @@ document.getElementById('btn-death-menu').addEventListener('click', exitToMenu);
 document.getElementById('btn-win-restart').addEventListener('click', startGame);
 document.getElementById('btn-win-menu').addEventListener('click', exitToMenu);
 document.getElementById('btn-win-share').addEventListener('click', function() {
-  var text = 'ESCAPÉ DE VOID STATION! 🚀\nCompleta la misión en voidstation.space';
-  if (navigator.share) {
-    navigator.share({ title: 'VOID STATION', text: text, url: window.location.href }).catch(function() {});
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function() {
-      alert('Copiado al portapapeles — comparte tu logro!');
-    }).catch(function() {});
-  } else {
-    prompt('Copia este texto:', text);
-  }
+  var url = 'https://www.facebook.com/sharer/sharer.php?quote=' + encodeURIComponent('ESCAPÉ DE VOID STATION! 🚀 Completé la misión. Juega en voidstation.space') + '&u=' + encodeURIComponent(window.location.href);
+  window.open(url, 'facebook-share', 'width=600,height=500');
 });
 
 var sliders = [

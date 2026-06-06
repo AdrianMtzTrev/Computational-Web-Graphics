@@ -350,7 +350,7 @@ export class Game {
     if (this._isTransitioning) return;
     this._isTransitioning = true;
     this.isPaused = true;
-    window.dispatchEvent(new CustomEvent('game-win'));
+    setTimeout(() => window.dispatchEvent(new CustomEvent('game-win')), 3000);
   }
 
   stop() {
