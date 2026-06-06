@@ -662,7 +662,7 @@ export class LabRoom {
     this.audioLoader.load('assets/sound/lab_ambient.ogg', buffer => {
       this._ambientAudio.setBuffer(buffer);
       this._ambientAudio.setLoop(true);
-      this._ambientAudio.setVolume(0.25);
+      this._ambientAudio.setVolume(window.__game?._volume ?? 0.25);
       this._ambientAudio.play();
     }, undefined, err => {
       console.warn('Failed to load lab ambient audio:', err);

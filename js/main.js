@@ -138,4 +138,14 @@ document.getElementById('btn-resume').addEventListener('click', resumeGame);
 document.getElementById('btn-restart').addEventListener('click', startGame);
 document.getElementById('btn-exit-to-menu').addEventListener('click', exitToMenu);
 
+var volumeSlider = document.getElementById('volume-slider');
+var volumeDisplay = document.getElementById('volume-value');
+volumeSlider.addEventListener('input', function() {
+  var v = parseFloat(volumeSlider.value);
+  volumeDisplay.textContent = Math.round(v) + '%';
+  if (window.__game) {
+    window.__game.setVolume(v / 100);
+  }
+});
+
 showScreen('menu');

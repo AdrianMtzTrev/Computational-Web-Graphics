@@ -18,6 +18,7 @@ export class Game {
     this.isRunning = false;
     this.isPaused = false;
     this._deathTriggered = false;
+    this._volume = 0.5;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -203,6 +204,14 @@ export class Game {
       document.removeEventListener('pointerlockerror', onLockError);
       this._resumeCleanup = null;
     };
+  }
+
+  setVolume(v) {
+    this._volume = v;
+    const room = this.sceneManager.getCurrentRoom();
+    if (room && room._ambientAudio) {
+      room._ambientAudio.setVolume(v);
+    }
   }
 
   restart() {

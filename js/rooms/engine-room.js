@@ -781,7 +781,7 @@ export class EngineRoom {
     this.audioLoader.load('assets/sound/engine_ambient.wav', buffer => {
       this._ambientAudio.setBuffer(buffer);
       this._ambientAudio.setLoop(true);
-      this._ambientAudio.setVolume(0.25);
+      this._ambientAudio.setVolume(window.__game?._volume ?? 0.25);
       this._ambientAudio.play();
     }, undefined, err => {
       console.warn('Failed to load engine ambient audio:', err);

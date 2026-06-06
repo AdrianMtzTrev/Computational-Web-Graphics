@@ -636,7 +636,7 @@ export class BridgeRoom {
     this.audioLoader.load('assets/sound/bridge_ambient.wav', buffer => {
       this._ambientAudio.setBuffer(buffer);
       this._ambientAudio.setLoop(true);
-      this._ambientAudio.setVolume(0.5);
+      this._ambientAudio.setVolume(window.__game?._volume ?? 0.5);
       this._ambientAudio.play();
     }, undefined, err => {
       console.warn('Failed to load bridge ambient audio:', err);
