@@ -68,6 +68,9 @@ app.post('/api/scores', async (req, res) => {
 // Socket.io — multiplayer rooms
 
 io.on('connection', (socket) => {
+  console.log('[SERVER] Socket connected:', socket.id, 'from:', socket.handshake.address);
+  console.log('[SERVER] Transport:', socket.conn.transport.name);
+
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
     socket.to(roomId).emit('player-joined', { id: socket.id });
@@ -81,7 +84,8 @@ io.on('connection', (socket) => {
     socket.to(data.room).emit('puzzle-update', { puzzle: data.puzzle, solved: true });
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (reason) => {
+    console.log('[SERVER] Socket disconnected:', socket.id, 'reason:', reason);
     for (const room of socket.rooms) {
       if (room !== socket.id) {
         socket.to(room).emit('player-left', { id: socket.id });

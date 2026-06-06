@@ -16,15 +16,23 @@ function getDefaultServer() {
 
 export function connect(serverUrl) {
   return new Promise((resolve) => {
+    const url = serverUrl || getDefaultServer();
+    console.log('[MP] connect() called, serverUrl:', serverUrl, 'resolved:', url);
+    console.log('[MP] window.location:', window.location.href, 'hostname:', window.location.hostname);
+
     import('socket.io-client').then(({ io }) => {
-      socket = io(serverUrl || getDefaultServer());
+      console.log('[MP] socket.io-client loaded successfully');
+      console.log('[MP] creating io with:', url);
+      socket = io(url);
 
       socket.on('connect', () => {
+        console.log('[MP] CONNECTED! socket.id:', socket.id);
         connected = true;
         resolve(true);
       });
 
-      socket.on('connect_error', () => {
+      socket.on('connect_error', (err) => {
+        console.log('[MP] CONNECT_ERROR:', err.message, err.type);
         connected = false;
         resolve(false);
       });
@@ -79,9 +87,15 @@ export function connect(serverUrl) {
       });
 
       setTimeout(() => {
-        if (!connected) resolve(false);
+        if (!connected) {
+          console.log('[MP] TIMEOUT - not connected after 5s');
+          resolve(false);
+        }
       }, 5000);
-    }).catch(() => resolve(false));
+    }).catch((err) => {
+      console.log('[MP] Dynamic import FAILED:', err);
+      resolve(false);
+    });
   });
 }
 
