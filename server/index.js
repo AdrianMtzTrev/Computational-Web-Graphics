@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const { getDb, initDb } = require('./db');
@@ -14,6 +15,9 @@ app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
+
+// Serve frontend static files (local development)
+app.use(express.static(path.join(__dirname, '..')));
 
 // API Routes
 

@@ -9,7 +9,7 @@ let _playerCount = 0;
 function getDefaultServer() {
   const host = window.location.hostname;
   if (host === 'localhost' || host === '127.0.0.1' || host === '') {
-    return 'http://localhost:3000';
+    return undefined; // same origin (server serves frontend + API + Socket.io)
   }
   return 'https://computational-web-graphics-production.up.railway.app';
 }

@@ -7,7 +7,7 @@ let _mpRoomCode = '';
 function getApiUrl() {
   const host = window.location.hostname;
   if (host === 'localhost' || host === '127.0.0.1' || host === '') {
-    return 'http://localhost:3000';
+    return ''; // same origin
   }
   return 'https://computational-web-graphics-production.up.railway.app';
 }
