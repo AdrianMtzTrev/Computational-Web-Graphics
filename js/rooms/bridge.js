@@ -55,6 +55,7 @@ export class BridgeRoom {
     await this._buildWorkstations(scene);
     this._buildHoloTable(scene);
     this._buildConsole(scene);
+    this._buildWallDecor(scene);
     this._buildPickupItems(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
@@ -189,6 +190,109 @@ export class BridgeRoom {
       scene.add(mesh);
       this.objects.push(mesh);
     });
+  }
+
+  _buildWallDecor(scene) {
+    const panelMat = new THREE.MeshStandardMaterial({ color: 0x2a3a5a, metalness: 0.5, roughness: 0.4 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, metalness: 0.6, roughness: 0.3 });
+    const conduitMat = new THREE.MeshStandardMaterial({ color: 0x445566, metalness: 0.6, roughness: 0.3 });
+    const accentMat = new THREE.MeshStandardMaterial({ color: 0x3366aa, metalness: 0.4, roughness: 0.3 });
+    const ledCyan = new THREE.MeshPhongMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.5 });
+    const ledBlue = new THREE.MeshPhongMaterial({ color: 0x4488ff, emissive: 0x4488ff, emissiveIntensity: 0.4 });
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+
+    const add = (g) => { scene.add(g); this.objects.push(g); };
+
+    const wallPos = (wall, x, y) => {
+      const g = new THREE.Group();
+      switch (wall) {
+        case 'n': g.position.set(x, y, 9.9); g.rotation.y = Math.PI; break;
+        case 's': g.position.set(x, y, -9.9); g.rotation.y = 0; break;
+        case 'w': g.position.set(-9.9, y, x); g.rotation.y = Math.PI / 2; break;
+        case 'e': g.position.set(9.9, y, x); g.rotation.y = -Math.PI / 2; break;
+      }
+      return g;
+    };
+
+    const panel = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.06), panelMat);
+      body.position.z = 0.03; g.add(body);
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.4, 0.07), accentMat);
+      stripe.position.set(-0.15, 0, 0.03); g.add(stripe);
+      stripe.position.set(0.15, 0, 0.03); g.add(stripe.clone());
+      const l1 = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.01), ledCyan);
+      l1.position.set(-0.05, 0.15, 0.06); g.add(l1);
+      const l2 = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.01), ledBlue);
+      l2.position.set(0.05, 0.15, 0.06); g.add(l2);
+      add(g);
+    };
+
+    const conduit = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const main = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.05, 0.06), conduitMat);
+      main.position.z = 0.03; g.add(main);
+      for (let ox = -0.5; ox <= 0.5; ox += 0.5) {
+        const block = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.1, 0.04), conduitMat);
+        block.position.set(ox, 0, 0.05); g.add(block);
+      }
+      add(g);
+    };
+
+    const statusPanel = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.05), darkMat);
+      body.position.z = 0.025; g.add(body);
+      const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 0.08), screenMat);
+      scr.position.set(0, 0.02, 0.05); g.add(scr);
+      [-1, 0, 1].forEach(i => {
+        const led = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.01), i === 0 ? ledCyan : ledBlue);
+        led.position.set(i * 0.06, -0.05, 0.05); g.add(led);
+      });
+      add(g);
+    };
+
+    // North wall — z=10, skip window positions (-5,-3,3,5)
+    panel('n', -9, 1.2);
+    conduit('n', -7, 2.8);
+    statusPanel('n', -1, 1.2);
+    conduit('n', 1, 2.8);
+    panel('n', 7, 1.2);
+    statusPanel('n', 9, 2.8);
+
+    // West wall — x=-10, z = -9,-7,-5,-3,-1,1,3,5,7,9
+    panel('w', -9, 1.2);
+    conduit('w', -7, 2.8);
+    statusPanel('w', -5, 1.2);
+    conduit('w', -3, 1.2);
+    panel('w', -1, 2.8);
+    statusPanel('w', 1, 1.2);
+    conduit('w', 3, 2.8);
+    panel('w', 5, 1.2);
+    statusPanel('w', 7, 2.8);
+    conduit('w', 9, 1.2);
+
+    // East wall — x=10, z = -9,-7,-5,-3,-1,1,3,5,7,9
+    statusPanel('e', -9, 2.8);
+    conduit('e', -7, 1.2);
+    panel('e', -5, 1.2);
+    statusPanel('e', -3, 2.8);
+    conduit('e', -1, 1.2);
+    panel('e', 1, 2.8);
+    statusPanel('e', 3, 1.2);
+    conduit('e', 5, 2.8);
+    panel('e', 7, 1.2);
+    conduit('e', 9, 1.2);
+
+    // South wall — z=-10, skip door gap (-1,1)
+    conduit('s', -9, 1.2);
+    statusPanel('s', -7, 2.8);
+    panel('s', -5, 1.2);
+    conduit('s', -3, 2.8);
+    statusPanel('s', 3, 1.2);
+    panel('s', 5, 2.8);
+    conduit('s', 7, 1.2);
+    statusPanel('s', 9, 2.8);
   }
 
   _buildHoloTable(scene) {
