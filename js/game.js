@@ -11,7 +11,7 @@ import { SceneManager } from './scene-manager.js';
 import { EngineRoom } from './rooms/engine-room.js';
 import { LabRoom } from './rooms/lab.js';
 import { BridgeRoom } from './rooms/bridge.js';
-import { syncMove, isConnected, getOtherPlayers } from './multiplayer.js';
+import { syncMove, isConnected, getOtherPlayers, getRoomCode } from './multiplayer.js';
 
 export class Game {
   constructor(mode = 'story', difficulty = 'easy') {
@@ -413,7 +413,7 @@ export class Game {
           syncMove(
             { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
             { x: 0, y: this.camera.rotation.y, z: 0 },
-            this.sceneManager.currentRoomId
+            getRoomCode()
           );
         }
       }
