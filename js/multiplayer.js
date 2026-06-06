@@ -20,82 +20,82 @@ export function connect(serverUrl) {
     console.log('[MP] connect() called, serverUrl:', serverUrl, 'resolved:', url);
     console.log('[MP] window.location:', window.location.href, 'hostname:', window.location.hostname);
 
-    import('socket.io-client').then(({ io }) => {
-      console.log('[MP] socket.io-client loaded successfully');
-      console.log('[MP] creating io with:', url);
-      socket = io(url);
+    if (typeof io === 'undefined') {
+      console.log('[MP] socket.io not loaded (window.io undefined)');
+      resolve(false);
+      return;
+    }
+    console.log('[MP] socket.io-client loaded successfully');
+    console.log('[MP] creating io with:', url);
+    socket = io(url);
 
-      socket.on('connect', () => {
-        console.log('[MP] CONNECTED! socket.id:', socket.id);
-        connected = true;
-        resolve(true);
-      });
+    socket.on('connect', () => {
+      console.log('[MP] CONNECTED! socket.id:', socket.id);
+      connected = true;
+      resolve(true);
+    });
 
-      socket.on('connect_error', (err) => {
-        console.log('[MP] CONNECT_ERROR:', err.message, err.type);
-        connected = false;
-        resolve(false);
-      });
-
-      socket.on('player-joined', (data) => {
-        _playerCount++;
-        window.dispatchEvent(new CustomEvent('mp-player-count', { detail: _playerCount }));
-        if (!otherPlayers[data.id]) {
-          const mat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.3 });
-          const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.5, 0.3), mat);
-          mesh.position.set(0, 0.75, 0);
-          const scene = window.__game?.scene;
-          if (scene) scene.add(mesh);
-          otherPlayers[data.id] = { mesh, pos: new THREE.Vector3() };
-        }
-      });
-
-      socket.on('sync-move', (data) => {
-        if (otherPlayers[data.id]) {
-          otherPlayers[data.id].pos.set(data.pos.x, data.pos.y, data.pos.z);
-          otherPlayers[data.id].mesh.position.copy(otherPlayers[data.id].pos);
-        }
-      });
-
-      socket.on('player-left', (data) => {
-        _playerCount = Math.max(0, _playerCount - 1);
-        window.dispatchEvent(new CustomEvent('mp-player-count', { detail: _playerCount }));
-        const p = otherPlayers[data.id];
-        if (p) {
-          if (p.mesh.parent) p.mesh.parent.remove(p.mesh);
-          delete otherPlayers[data.id];
-        }
-      });
-
-      socket.on('puzzle-update', (data) => {
-        const rooms = {
-          engine: window.__game?.engineRoom,
-          lab: window.__game?.labRoom,
-          bridge: window.__game?.bridgeRoom,
-        };
-        for (const key in rooms) {
-          const room = rooms[key];
-          if (room && room._puzzleStates) {
-            room._puzzleStates.forEach(p => {
-              if (p.id === data.puzzle) p.solved = data.solved;
-            });
-          }
-          if (data.puzzle === 'lab' && room && room.puzzleSolved !== undefined) {
-            room.puzzleSolved = data.solved;
-          }
-        }
-      });
-
-      setTimeout(() => {
-        if (!connected) {
-          console.log('[MP] TIMEOUT - not connected after 5s');
-          resolve(false);
-        }
-      }, 5000);
-    }).catch((err) => {
-      console.log('[MP] Dynamic import FAILED:', err);
+    socket.on('connect_error', (err) => {
+      console.log('[MP] CONNECT_ERROR:', err.message, err.type);
+      connected = false;
       resolve(false);
     });
+
+    socket.on('player-joined', (data) => {
+      _playerCount++;
+      window.dispatchEvent(new CustomEvent('mp-player-count', { detail: _playerCount }));
+      if (!otherPlayers[data.id]) {
+        const mat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.3 });
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.5, 0.3), mat);
+        mesh.position.set(0, 0.75, 0);
+        const scene = window.__game?.scene;
+        if (scene) scene.add(mesh);
+        otherPlayers[data.id] = { mesh, pos: new THREE.Vector3() };
+      }
+    });
+
+    socket.on('sync-move', (data) => {
+      if (otherPlayers[data.id]) {
+        otherPlayers[data.id].pos.set(data.pos.x, data.pos.y, data.pos.z);
+        otherPlayers[data.id].mesh.position.copy(otherPlayers[data.id].pos);
+      }
+    });
+
+    socket.on('player-left', (data) => {
+      _playerCount = Math.max(0, _playerCount - 1);
+      window.dispatchEvent(new CustomEvent('mp-player-count', { detail: _playerCount }));
+      const p = otherPlayers[data.id];
+      if (p) {
+        if (p.mesh.parent) p.mesh.parent.remove(p.mesh);
+        delete otherPlayers[data.id];
+      }
+    });
+
+    socket.on('puzzle-update', (data) => {
+      const rooms = {
+        engine: window.__game?.engineRoom,
+        lab: window.__game?.labRoom,
+        bridge: window.__game?.bridgeRoom,
+      };
+      for (const key in rooms) {
+        const room = rooms[key];
+        if (room && room._puzzleStates) {
+          room._puzzleStates.forEach(p => {
+            if (p.id === data.puzzle) p.solved = data.solved;
+          });
+        }
+        if (data.puzzle === 'lab' && room && room.puzzleSolved !== undefined) {
+          room.puzzleSolved = data.solved;
+        }
+      }
+    });
+
+    setTimeout(() => {
+      if (!connected) {
+        console.log('[MP] TIMEOUT - not connected after 5s');
+        resolve(false);
+      }
+    }, 5000);
   });
 }
 
