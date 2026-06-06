@@ -30,11 +30,11 @@ El jugador despierta en una estación espacial desactivada. Debe explorar habita
 
 ### 2 Modos de Juego
 1. **Historia** — recorrer salas en orden, resolver puzzles, escapar
-2. **Contrarreloj** — máximo progreso en X minutos, puntuación al final
+2. **No Daño** — modo exploración sin riesgo de muerte (1 HP)
 
 ### 2 Dificultades
-- **Fácil:** puzzles simples, IA lenta, más pistas
-- **Difícil:** puzzles complejos, IA agresiva, menos pistas
+- **Fácil:** 150 HP, IA lenta (speed 1.0, chase 2.0, detection 3m, daño 5)
+- **Difícil:** 75 HP, IA agresiva (speed 2.0, chase 4.5, detection 7m, daño 25), láser del laboratorio dañino
 
 ### Mecánica de Puzzles
 - Buscar y usar objetos (tarjeta de acceso, batería, kit de reparación)

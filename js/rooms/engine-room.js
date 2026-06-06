@@ -815,7 +815,8 @@ export class EngineRoom {
 
   _setupDrones(scene) {
     const wp = [[-2, 1.5, 4], [2, 1.5, 4], [2, 1.5, -3], [-2, 1.5, -3]];
-    const drone = new SecurityDrone(wp, 0, 1.2);
+    const diff = window.__game?.difficulty || 'easy';
+    const drone = new SecurityDrone(wp, 0, diff);
     drone.setPosition(-2, 1.5, 4);
     scene.add(drone.group);
     this.objects.push(drone.group);

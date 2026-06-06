@@ -3,13 +3,15 @@ import * as THREE from 'three';
 const STATE = { PATROL: 0, CHASE: 1, RETURN: 2 };
 
 export class SecurityDrone {
-  constructor(waypoints, startIdx, speed) {
+  constructor(waypoints, startIdx, difficulty) {
+    const isHard = difficulty === 'hard';
     this.waypoints = waypoints.map(p => new THREE.Vector3(p[0], p[1], p[2]));
     this.targetIdx = startIdx || 0;
-    this.speed = speed || 1.5;
+    this.speed = isHard ? 2.0 : 1.0;
     this.state = STATE.PATROL;
-    this.detectionRadius = 5;
-    this.chaseSpeed = 3.0;
+    this.detectionRadius = isHard ? 7 : 3;
+    this.chaseSpeed = isHard ? 4.5 : 2.0;
+    this._damage = isHard ? 25 : 5;
     this.damageCooldown = 0;
     this.returnTarget = null;
 
@@ -116,7 +118,7 @@ export class SecurityDrone {
       this.damageCooldown = 0.5;
       const player = window.__game?.player;
       if (player) {
-        player.takeDamage(this.damageCooldown > 0 ? 10 : 10);
+        player.takeDamage(this._damage);
         window.__game?.hud?.showMessage('⚠ DAÑO POR DRON', 1000);
       }
     }
