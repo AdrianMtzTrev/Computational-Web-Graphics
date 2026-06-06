@@ -19,6 +19,7 @@ export class LabRoom {
     this.terminalGroup = null;
     this.terminalScreens = [];
     this.puzzleSolved = false;
+    this._drones = [];
 
     this.requiredItems = [
       { id: 'chemical_sample', name: 'Muestra Química', icon: '🧪' },

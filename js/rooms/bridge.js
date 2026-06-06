@@ -15,6 +15,7 @@ export class BridgeRoom {
     this._consoleGroup = null;
     this._consoleScreens = [];
     this._puzzleSolved = false;
+    this._drones = [];
     this._transitionCallback = null;
     this._transitionTriggered = false;
 
