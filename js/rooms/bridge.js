@@ -469,6 +469,7 @@ export class BridgeRoom {
       required.forEach(id => player.removeItem(id));
       this._puzzleSolved = true;
       hud.showMessage('✅ COORDENADAS LISTAS — ESCAPE INICIADO', 4000);
+      window.__game?.save();
       this._consoleScreens.forEach(s => {
         if (s.material) s.material.color.setHex(0x00ff88);
         if (s.material && s.material.emissive) s.material.emissive.setHex(0x00ff88);
@@ -564,6 +565,7 @@ export class BridgeRoom {
     if (window.__game?.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
     }
+    window.__game?.save();
   }
 
   _setupLights(scene) {

@@ -21,11 +21,34 @@ async function startGame() {
     window.__game = null;
     await new Promise(r => setTimeout(r, 150));
   }
+  try { localStorage.removeItem('voidstation_save'); } catch (e) {}
   gameInstance = new Game(getGameMode());
   window.__game = gameInstance;
 
   showScreen('game');
   await gameInstance.start();
+}
+
+async function continueGame() {
+  if (gameInstance) {
+    gameInstance.dispose();
+    gameInstance = null;
+    window.__game = null;
+    await new Promise(r => setTimeout(r, 150));
+  }
+  var saveData = null;
+  try {
+    var raw = localStorage.getItem('voidstation_save');
+    if (raw) saveData = JSON.parse(raw);
+  } catch (e) {}
+  if (!saveData) return;
+
+  var mode = saveData.mode || 'story';
+  gameInstance = new Game(mode);
+  window.__game = gameInstance;
+
+  showScreen('game');
+  await gameInstance.start(saveData);
 }
 
 function pauseGame() {
@@ -52,7 +75,14 @@ function exitToMenu() {
     gameInstance = null;
     window.__game = null;
   }
-  showScreen('menu');
+// Show continue button if save exists
+try {
+  if (localStorage.getItem('voidstation_save')) {
+    document.getElementById('btn-continue').style.display = '';
+  }
+} catch (e) {}
+
+showScreen('menu');
 }
 
 document.addEventListener('keydown', function(e) {
@@ -82,12 +112,14 @@ window.addEventListener('game-pause', function() {
 window.addEventListener('game-win', function() {
   var hud = document.getElementById('game-hud');
   if (hud) hud.style.display = 'none';
+  if (window.__game) window.__game.clearSave();
   showScreen('win');
 });
 
 window.addEventListener('game-death', function() {
   var hud = document.getElementById('game-hud');
   if (hud) hud.style.display = 'none';
+  try { localStorage.removeItem('voidstation_save'); } catch (e) {}
   showScreen('death');
 });
 
@@ -128,6 +160,7 @@ modeBtns.forEach(function(btn) {
 });
 
 document.getElementById('btn-play').addEventListener('click', startGame);
+document.getElementById('btn-continue').addEventListener('click', continueGame);
 document.getElementById('btn-config').addEventListener('click', function() { showScreen('config'); });
 document.getElementById('btn-scores').addEventListener('click', function() { showScreen('scores'); });
 
@@ -147,5 +180,11 @@ volumeSlider.addEventListener('input', function() {
     window.__game.setVolume(v / 100);
   }
 });
+
+try {
+  if (localStorage.getItem('voidstation_save')) {
+    document.getElementById('btn-continue').style.display = '';
+  }
+} catch (e) {}
 
 showScreen('menu');

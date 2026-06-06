@@ -550,6 +550,7 @@ export class EngineRoom {
     }
     const hud = window.__game?.hud;
     if (hud) hud.showMessage('⚡ REACTOR ACTIVADO — SISTEMAS CRÍTICOS ONLINE', 4000);
+    window.__game?.save();
   }
 
   _onAccessSolved() {
@@ -557,6 +558,7 @@ export class EngineRoom {
     this.sciFiDoorAnimT = 0;
     const hud = window.__game?.hud;
     if (hud) hud.showMessage('🚪 PUERTA ABIERTA — ACCESO AL CORREDOR', 4000);
+    window.__game?.save();
   }
 
   _findReactorCore() {
@@ -659,6 +661,7 @@ export class EngineRoom {
     if (window.__game?.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
     }
+    window.__game?.save();
   }
 
   _rebuildInteractiveObjects() {

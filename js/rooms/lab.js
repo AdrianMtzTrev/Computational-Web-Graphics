@@ -496,6 +496,7 @@ export class LabRoom {
       this.gateOpen = true;
       this.gateAnimT = 0;
       hud.showMessage('✅ MUESTRAS COMPLETAS — DESACTIVANDO BARRERA', 4000);
+      window.__game?.save();
     } else {
       const names = missing.map(m => m.name).join(', ');
       hud.showMessage(`❌ FALTAN: ${names}`, 3000);
@@ -583,6 +584,7 @@ export class LabRoom {
     if (window.__game?.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
     }
+    window.__game?.save();
   }
 
   _rebuildInteractiveObjects() {

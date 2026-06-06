@@ -145,15 +145,47 @@ export class Game {
     this.controls.addEventListener('unlock', this._onUnlock);
   }
 
-  async start() {
+  async start(saveData) {
     this.isRunning = true;
     this.isPaused = false;
 
     document.getElementById('loading-screen').classList.add('active');
 
-    await this.sceneManager.switchTo('engine');
+    const targetRoom = saveData?.currentRoom || 'engine';
+    await this.sceneManager.switchTo(targetRoom);
     this.scene.add(this.player.flashlight);
     this.scene.add(this.player.flashlightTarget);
+
+    if (saveData) {
+      if (saveData.inventory) {
+        saveData.inventory.forEach(item => this.player.addItem(item));
+      }
+      const p = saveData.puzzles || {};
+      if (p.engine) {
+        if (this.engineRoom._puzzleStates) {
+          this.engineRoom._puzzleStates[0].solved = p.engine.power || false;
+          this.engineRoom._puzzleStates[1].solved = p.engine.access || false;
+        }
+        if (p.engine.access && this.engineRoom.sciFiDoor) {
+          this.engineRoom.sciFiDoorOpen = true;
+          this.engineRoom.sciFiDoorAnimT = 1;
+          this.engineRoom.sciFiDoor.position.y = 3.0;
+        }
+        if (p.engine.power) {
+          const mat = this.engineRoom._findReactorCore();
+          if (mat) { mat.emissiveIntensity = 1.0; mat.opacity = 0.9; mat.color.setHex(0xff6600); }
+        }
+      }
+      if (p.lab?.solved) {
+        this.labRoom.puzzleSolved = true;
+        this.labRoom.gateOpen = true;
+        this.labRoom.gateAnimT = 1;
+        this.labRoom.laserMeshes.forEach(m => { m.visible = false; });
+      }
+      if (p.bridge?.solved) {
+        this.bridgeRoom._puzzleSolved = true;
+      }
+    }
 
     const room = this.sceneManager.getCurrentRoom();
     if (room && room.getColliders) {
@@ -214,6 +246,37 @@ export class Game {
     }
   }
 
+  save() {
+    const room = this.sceneManager.getCurrentRoom();
+    const player = this.player;
+    const data = {
+      mode: this.mode,
+      currentRoom: this.sceneManager.currentRoomId,
+      inventory: player.inventory.map(i => ({ id: i.id, name: i.name, icon: i.icon })),
+      puzzles: {
+        engine: {
+          power: this.engineRoom._puzzleStates?.[0]?.solved || false,
+          access: this.engineRoom._puzzleStates?.[1]?.solved || false,
+        },
+        lab: { solved: this.labRoom.puzzleSolved || false },
+        bridge: { solved: this.bridgeRoom._puzzleSolved || false },
+      },
+    };
+    try { localStorage.setItem('voidstation_save', JSON.stringify(data)); } catch (e) {}
+  }
+
+  loadSave() {
+    try {
+      const raw = localStorage.getItem('voidstation_save');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
+
+  clearSave() {
+    try { localStorage.removeItem('voidstation_save'); } catch (e) {}
+  }
+
   restart() {
     this.dispose();
     const saved = new Game();
@@ -226,6 +289,7 @@ export class Game {
     this._isTransitioning = true;
     this.isPaused = true;
 
+    this.save();
     document.getElementById('loading-screen').classList.add('active');
 
     await this.sceneManager.switchTo('lab');
@@ -250,6 +314,7 @@ export class Game {
     this._isTransitioning = true;
     this.isPaused = true;
 
+    this.save();
     document.getElementById('loading-screen').classList.add('active');
 
     await this.sceneManager.switchTo('bridge');
