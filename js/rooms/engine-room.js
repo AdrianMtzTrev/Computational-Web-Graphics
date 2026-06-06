@@ -698,19 +698,19 @@ export class EngineRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambient);
     this.lights.push(ambient);
 
     for (let i = 0; i < 4; i++) {
       const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
       const r = 3.0;
-      const emLight = new THREE.PointLight(0xff0000, 0.4, 15);
+      const emLight = new THREE.PointLight(0xff4400, 0.5, 12);
       emLight.position.set(Math.cos(angle) * r, 1.6, Math.sin(angle) * r);
       scene.add(emLight);
       this.flickerLights.push({
         light: emLight,
-        baseIntensity: 0.4,
+        baseIntensity: 0.5,
         speed: 2.5 + Math.random() * 2,
         amplitude: 0.3,
       });
@@ -781,7 +781,7 @@ export class EngineRoom {
     this.audioLoader.load('assets/sound/engine_ambient.wav', buffer => {
       this._ambientAudio.setBuffer(buffer);
       this._ambientAudio.setLoop(true);
-      this._ambientAudio.setVolume(0.3);
+      this._ambientAudio.setVolume(0.25);
       this._ambientAudio.play();
     }, undefined, err => {
       console.warn('Failed to load engine ambient audio:', err);

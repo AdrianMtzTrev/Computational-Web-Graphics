@@ -567,17 +567,23 @@ export class BridgeRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0x4488ff, 0.6);
+    const ambient = new THREE.AmbientLight(0x3366cc, 0.5);
     scene.add(ambient);
     this.lights.push(ambient);
 
-    const positions = [[-6, 4.0, -6], [6, 4.0, -6], [-6, 4.0, 6], [6, 4.0, 6], [0, 4.0, 0]];
+    const positions = [[-6, 4.0, -6], [6, 4.0, -6], [-6, 4.0, 6], [6, 4.0, 6]];
     positions.forEach(p => {
-      const light = new THREE.PointLight(0x88ccff, 1.2, 14);
+      const light = new THREE.PointLight(0x6699ff, 0.8, 14);
       light.position.set(p[0], p[1], p[2]);
       scene.add(light);
       this.lights.push(light);
     });
+
+    // Warm accent near holo table
+    const warm = new THREE.PointLight(0xff8844, 0.4, 6);
+    warm.position.set(0, 1.5, 0);
+    scene.add(warm);
+    this.lights.push(warm);
   }
 
   _setupParticles(scene) {
