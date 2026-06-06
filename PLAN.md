@@ -116,6 +116,7 @@ luego replicar el patrón en Laboratorio y Puente de Mando. Esto evita acumular 
 | **Mié 3** | Lab + Bridge + Modos | Escenarios 2 y 3 (reusando patrón de engine-room), modo Historia + Contrarreloj, 2 dificultades |
 | **Jue 4** | IA + Partículas + Multiplayer | Drones patrulla/persecución, mejora de partículas, Socket.io multijugador |
 | **Vie 5** | Backend + Deploy + Redes | Express + MySQL, API REST, LocalStorage, GitHub Pages, Railway, botón redes sociales |
+| **Sáb 6** 🎯 | Finalización | Todos los requisitos PLAN.md completados ✅ |
 
 ## Checklist de Requisitos (Rúbrica)
 
@@ -128,16 +129,16 @@ luego replicar el patrón en Laboratorio y Puente de Mando. Esto evita acumular 
 - [x] Detección y uso de colisiones
 - [x] Iluminación ambiental (AmbientLight en Sala Máquinas)
 - [x] Iluminación focal (PointLights parpadeantes en Sala Máquinas)
-- [ ] 2 niveles de dificultad (no basados en tiempo)
-- [ ] 3 escenarios totalmente distintos
-- [ ] 2 modos de juego distintos
-- [ ] Servicio web (API REST)
-- [ ] Uso de redes sociales (compartir puntuación)
-- [ ] Efectos de sonido y música de fondo
+- [x] 2 niveles de dificultad (no basados en tiempo)
+- [x] 3 escenarios totalmente distintos
+- [x] 2 modos de juego distintos
+- [x] Servicio web (API REST)
+- [x] Uso de redes sociales (compartir puntuación)
+- [x] Efectos de sonido y música de fondo
 - [x] 3+ ítems especiales
-- [ ] Multijugador en tiempo real
+- [x] Multijugador en tiempo real
 - [x] Partículas (PointsMaterial — vapor en Sala Máquinas)
-- [ ] IA (seguimiento de enemigos al personaje)
+- [x] IA (seguimiento de enemigos al personaje)
 - [x] Modelos con texturas y animaciones (GLTF — Kenney Modular Space Kit)
-- [ ] Almacenamiento local (LocalStorage)
-- [ ] Almacenamiento remoto (MySQL)
+- [x] Almacenamiento local (LocalStorage)
+- [x] Almacenamiento remoto (MySQL)
