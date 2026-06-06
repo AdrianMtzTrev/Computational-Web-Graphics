@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { Player } from './player.js';
 import { HUD } from './hud.js';
 import { SceneManager } from './scene-manager.js';
@@ -22,6 +26,42 @@ export class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.9;
+
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.25, 0.15, 0.1
+    );
+    this.composer.addPass(bloomPass);
+
+    const vignetteShader = {
+      uniforms: {
+        tDiffuse: { value: null },
+        offset: { value: 0.95 },
+        darkness: { value: 0.6 },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float offset;
+        uniform float darkness;
+        varying vec2 vUv;
+        void main() {
+          vec4 texel = texture2D(tDiffuse, vUv);
+          vec2 uv = (vUv - vec2(0.5)) * vec2(offset);
+          gl_FragColor = vec4(mix(texel.rgb, vec3(0.0), dot(uv, uv) * darkness), texel.a);
+        }
+      `,
+    };
+    const vignettePass = new ShaderPass(vignetteShader);
+    this.composer.addPass(vignettePass);
 
     const container = document.getElementById('game-canvas-container');
     container.appendChild(this.renderer.domElement);
@@ -68,9 +108,12 @@ export class Game {
     this._isTransitioning = false;
 
     this._onResize = () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setSize(w, h);
+      this.composer.setSize(w, h);
     };
     window.addEventListener('resize', this._onResize);
 
@@ -246,6 +289,7 @@ export class Game {
   dispose() {
     this.stop();
     this.hud.dispose();
+    this.composer.dispose();
     this.renderer.dispose();
     const container = document.getElementById('game-canvas-container');
     while (container.firstChild) container.removeChild(container.firstChild);
@@ -262,7 +306,7 @@ export class Game {
       this.player.update(delta);
       this.sceneManager.update(delta, this.clock.elapsedTime);
       this.hud.update(this.player);
-      this.renderer.render(this.scene, this.camera);
+      this.composer.render();
 
       if (this.mode === 'nodamage') {
         if (this.player.feetY < -10) this.player.health = 0;
