@@ -111,9 +111,8 @@ export class BridgeRoom {
   }
 
   async _buildSciFiWalls(scene) {
-    const [w0, windowDouble] = await Promise.allSettled([
+    const [w0] = await Promise.allSettled([
       this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_001+_V2.0/Pack_SciFi_A_001_V2.0/02_EXPORT/OBJ/SM_Wall_V0.glb'),
-      this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_003_V2.0/02_EXPORT/OBJ/SM_WallPanel_Large_Window_Double.glb'),
     ]);
 
     const setup = (obj) => {
@@ -131,31 +130,27 @@ export class BridgeRoom {
     };
 
     const w = w0.status === 'fulfilled' ? w0.value : null;
-    const wd = windowDouble.status === 'fulfilled' ? windowDouble.value : null;
 
     const xs = [-9, -7, -5, -3, -1, 1, 3, 5, 7, 9];
+    const windowPos = new Set([-5, -3, 3, 5]);
 
-    const placeWall = (wall, x, z, ry) => {
-      const isWindowPos = (wall === 'n' || wall === 's') && (x === -5 || x === -3 || x === 3 || x === 5);
-      if (isWindowPos && wd) {
-        place(wd, x, z, ry, 2);
-        return;
-      }
-      if (w) {
-        place(w, x, z, ry, 1);
-        place(w, x, z, ry, 3);
-      }
-    };
-
-    xs.forEach(x => { placeWall('n', x, 10, Math.PI / 2); });
-
+    // North wall — skip window positions
     xs.forEach(x => {
-      if (x === -1 || x === 1) return;
-      placeWall('s', x, -10, -Math.PI / 2);
+      if (windowPos.has(x)) return;
+      if (w) { place(w, x, 10, Math.PI / 2, 1); place(w, x, 10, Math.PI / 2, 3); }
     });
 
-    xs.forEach(z => { placeWall('w', -10, z, Math.PI); });
-    xs.forEach(z => { placeWall('e', 10, z, 0); });
+    // South wall — skip door gap
+    xs.forEach(x => {
+      if (x === -1 || x === 1) return;
+      if (w) { place(w, x, -10, -Math.PI / 2, 1); place(w, x, -10, -Math.PI / 2, 3); }
+    });
+
+    // West wall
+    xs.forEach(z => { if (w) { place(w, -10, z, Math.PI, 1); place(w, -10, z, Math.PI, 3); } });
+
+    // East wall
+    xs.forEach(z => { if (w) { place(w, 10, z, 0, 1); place(w, 10, z, 0, 3); } });
 
     const starCanvas = document.createElement('canvas');
     starCanvas.width = 512;
@@ -176,8 +171,8 @@ export class BridgeRoom {
     const starTex = new THREE.CanvasTexture(starCanvas);
     starTex.needsUpdate = true;
 
-    [[-4, -2], [2, 4]].forEach(([fromX, toX]) => {
-      const width = (toX - fromX) + 2;
+    [[-6, -2], [2, 6]].forEach(([fromX, toX]) => {
+      const width = toX - fromX;
       const geo = new THREE.PlaneGeometry(width, 4);
       const mat = new THREE.MeshBasicMaterial({
         map: starTex,
@@ -265,6 +260,7 @@ export class BridgeRoom {
     const place = (model, x, z, ry) => {
       if (!model) return;
       const c = model.clone();
+      c.scale.set(2.5, 2.5, 2.5);
       c.position.set(x, 0, z);
       c.rotation.y = ry;
       setup(c);
@@ -283,12 +279,15 @@ export class BridgeRoom {
     ];
 
     positions.forEach(p => {
+      const chairX = p.x + 1.2;
+      const chairZ = p.z + 0.3;
+      const offset = 1.6;
       if (pc) {
-        place(pc, p.x, p.z, p.ry);
-        place(pc, p.x, p.z + 1.2, p.ry);
+        const compZ = p.ry === 0 ? chairZ + offset : chairZ - offset;
+        place(pc, chairX, compZ, p.ry === 0 ? Math.PI : 0);
       }
       if (ch) {
-        place(ch, p.x + 1.2, p.z + 0.3, p.ry);
+        place(ch, chairX, chairZ, p.ry);
       }
     });
   }
@@ -530,10 +529,10 @@ export class BridgeRoom {
       // Holo table base
       new THREE.Box3(new THREE.Vector3(-0.8, 0, -0.8), new THREE.Vector3(0.8, 1.2, 0.8)),
       // Workstations
-      new THREE.Box3(new THREE.Vector3(-5.8, 0, -5.8), new THREE.Vector3(-4.2, 0.8, -4.2)),
-      new THREE.Box3(new THREE.Vector3(4.2, 0, -5.8), new THREE.Vector3(5.8, 0.8, -4.2)),
-      new THREE.Box3(new THREE.Vector3(-5.8, 0, 4.2), new THREE.Vector3(-4.2, 0.8, 5.8)),
-      new THREE.Box3(new THREE.Vector3(4.2, 0, 4.2), new THREE.Vector3(5.8, 0.8, 5.8)),
+      new THREE.Box3(new THREE.Vector3(-4.2, 0, -5.0), new THREE.Vector3(-3.4, 0.8, -3.8)),
+      new THREE.Box3(new THREE.Vector3(5.8, 0, -5.6), new THREE.Vector3(6.6, 0.8, -4.4)),
+      new THREE.Box3(new THREE.Vector3(-4.2, 0, 5.0), new THREE.Vector3(-3.4, 0.8, 6.2)),
+      new THREE.Box3(new THREE.Vector3(5.8, 0, 4.4), new THREE.Vector3(6.6, 0.8, 5.6)),
       // Navigation console
       new THREE.Box3(new THREE.Vector3(-0.5, 0, -4.6), new THREE.Vector3(0.5, 0.7, -3.4)),
     ];
