@@ -46,6 +46,7 @@ export class LabRoom {
 
     await this._buildMoltenRoom(scene);
     await this._buildSciFiWalls(scene);
+    await this._buildFurniture(scene);
 
     const gate = await this._loadModular('gate-lasers.glb');
     this.gateLasers = gate;
@@ -226,6 +227,37 @@ export class LabRoom {
 
     // East wall (x=10)
     xs.forEach(z => { place(pick('e', z, 1), 10, z, 0, 1); place(pick('e', z, 3), 10, z, 0, 3); });
+  }
+
+  async _buildFurniture(scene) {
+    const [table, chair] = await Promise.allSettled([
+      this._loadStationModel('table-display.glb'),
+      this._loadStationModel('chair.glb'),
+    ]);
+
+    const setup = (obj) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    };
+
+    const place = (model, x, z, ry) => {
+      if (!model) return;
+      const c = model.clone();
+      c.scale.set(2.5, 2.5, 2.5);
+      c.position.set(x, 0, z);
+      c.rotation.y = ry;
+      setup(c);
+      scene.add(c);
+      this.objects.push(c);
+    };
+
+    const tb = table.status === 'fulfilled' ? table.value : null;
+    const ch = chair.status === 'fulfilled' ? chair.value : null;
+
+    if (tb) place(tb, 7, -3, 0);
+    if (ch) place(ch, 7, -1.8, 0);
+
+    if (tb) place(tb, -7, 3, Math.PI);
+    if (ch) place(ch, -7, 1.8, Math.PI);
   }
 
   _buildTerminal(scene) {
@@ -461,6 +493,11 @@ export class LabRoom {
       // South wall — gap for door 4m (x=-2 to x=2)
       new THREE.Box3(new THREE.Vector3(-10, 0, -10.2), new THREE.Vector3(-2, 4, -9.8)),
       new THREE.Box3(new THREE.Vector3(2, 0, -10.2), new THREE.Vector3(10, 4, -9.8)),
+      // Lab workstations
+      new THREE.Box3(new THREE.Vector3(6.2, 0, -3.8), new THREE.Vector3(7.8, 0.8, -2.2)),
+      new THREE.Box3(new THREE.Vector3(6.2, 0, -2.2), new THREE.Vector3(7.8, 0.8, -1.4)),
+      new THREE.Box3(new THREE.Vector3(-7.8, 0, 2.2), new THREE.Vector3(-6.2, 0.8, 3.8)),
+      new THREE.Box3(new THREE.Vector3(-7.8, 0, 1.4), new THREE.Vector3(-6.2, 0.8, 2.2)),
     ];
   }
 
