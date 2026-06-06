@@ -39,6 +39,10 @@ export class LabRoom {
     this.moltenLoader.setPath('assets/models/molten-maps/');
 
     this.sciFiLoader = new GLTFLoader();
+    this.audioLoader = new THREE.AudioLoader();
+    this._ambientAudio = null;
+    this._onPause = null;
+    this._onResume = null;
   }
 
   async load(scene) {
@@ -73,6 +77,7 @@ export class LabRoom {
     this._buildPickupItems(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
+    this._setupAudio(scene);
     this._setupColliders();
 
     this._rebuildInteractiveObjects();
@@ -642,6 +647,33 @@ export class LabRoom {
     this.objects.push(this.particles);
   }
 
+  _setupAudio(scene) {
+    const camera = window.__game?.camera;
+    if (!camera) return;
+
+    let listener = camera.userData._audioListener;
+    if (!listener) {
+      listener = new THREE.AudioListener();
+      camera.add(listener);
+      camera.userData._audioListener = listener;
+    }
+
+    this._ambientAudio = new THREE.Audio(listener);
+    this.audioLoader.load('assets/sound/lab_ambient.ogg', buffer => {
+      this._ambientAudio.setBuffer(buffer);
+      this._ambientAudio.setLoop(true);
+      this._ambientAudio.setVolume(0.25);
+      this._ambientAudio.play();
+    }, undefined, err => {
+      console.warn('Failed to load lab ambient audio:', err);
+    });
+
+    this._onPause = () => { if (this._ambientAudio) this._ambientAudio.pause(); };
+    this._onResume = () => { if (this._ambientAudio) this._ambientAudio.play(); };
+    window.addEventListener('game-pause', this._onPause);
+    window.addEventListener('game-resume', this._onResume);
+  }
+
   _setupColliders() {
     this.colliders = [
       new THREE.Box3(new THREE.Vector3(-10.2, 0, -10), new THREE.Vector3(-9.8, 4, 10)),
@@ -758,5 +790,11 @@ export class LabRoom {
     this.puzzleSolved = false;
     this._transitionCallback = null;
     this._transitionTriggered = false;
+    if (this._onPause) window.removeEventListener('game-pause', this._onPause);
+    if (this._onResume) window.removeEventListener('game-resume', this._onResume);
+    if (this._ambientAudio) {
+      this._ambientAudio.stop();
+      this._ambientAudio = null;
+    }
   }
 }
