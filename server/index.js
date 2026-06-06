@@ -73,7 +73,17 @@ io.on('connection', (socket) => {
 
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
+    // Notify others that a new player joined
     socket.to(roomId).emit('player-joined', { id: socket.id });
+    // Send existing players to the new joiner
+    const room = io.sockets.adapter.rooms.get(roomId);
+    if (room) {
+      for (const sid of room) {
+        if (sid !== socket.id) {
+          socket.emit('player-joined', { id: sid });
+        }
+      }
+    }
   });
 
   socket.on('player-move', (data) => {
