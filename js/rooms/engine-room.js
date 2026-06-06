@@ -53,6 +53,7 @@ export class EngineRoom {
     this._buildReactor(scene);
     this._buildConsoles(scene);
     this._buildPipes(scene);
+    this._buildWallDecor(scene);
     this._buildPickupItems(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
@@ -200,6 +201,134 @@ export class EngineRoom {
       this.objects.push(g);
       this.sciFiDoor = g;
     }
+  }
+
+  _buildWallDecor(scene) {
+    const panelMat = new THREE.MeshStandardMaterial({ color: 0x3a4a5a, metalness: 0.4, roughness: 0.6 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.5, roughness: 0.4 });
+    const conduitMat = new THREE.MeshStandardMaterial({ color: 0x555566, metalness: 0.6, roughness: 0.3 });
+    const redMat = new THREE.MeshStandardMaterial({ color: 0x662222, metalness: 0.3, roughness: 0.5 });
+    const hazardMat = new THREE.MeshStandardMaterial({ color: 0xccaa00, emissive: 0xccaa00, emissiveIntensity: 0.05 });
+    const ledGreen = new THREE.MeshPhongMaterial({ color: 0x00ff44, emissive: 0x00ff44, emissiveIntensity: 0.5 });
+    const ledRed = new THREE.MeshPhongMaterial({ color: 0xff2222, emissive: 0xff2222, emissiveIntensity: 0.3 });
+    const ledAmber = new THREE.MeshPhongMaterial({ color: 0xffaa00, emissive: 0xffaa00, emissiveIntensity: 0.4 });
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x00ff66 });
+
+    const add = (g) => { scene.add(g); this.objects.push(g); };
+
+    const wallPos = (wall, x, y) => {
+      const g = new THREE.Group();
+      switch (wall) {
+        case 'n': g.position.set(x, y, 7.9); g.rotation.y = Math.PI; break;
+        case 's': g.position.set(x, y, -7.9); g.rotation.y = 0; break;
+        case 'w': g.position.set(-7.9, y, x); g.rotation.y = Math.PI / 2; break;
+        case 'e': g.position.set(7.9, y, x); g.rotation.y = -Math.PI / 2; break;
+      }
+      return g;
+    };
+
+    const powerBox = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.08), panelMat);
+      body.position.z = 0.04; g.add(body);
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.5, 0.09), darkMat);
+      stripe.position.set(-0.2, 0, 0.04); g.add(stripe);
+      stripe.position.set(0.2, 0, 0.04); g.add(stripe.clone());
+      const l1 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.01), ledGreen);
+      l1.position.set(-0.1, 0.2, 0.08); g.add(l1);
+      const l2 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.01), ledRed);
+      l2.position.set(0.1, 0.2, 0.08); g.add(l2);
+      const l3 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.01), ledAmber);
+      l3.position.set(0, -0.15, 0.08); g.add(l3);
+      add(g);
+    };
+
+    const conduit = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const main = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.06, 0.08), conduitMat);
+      main.position.z = 0.04; g.add(main);
+      for (let ox = -0.5; ox <= 0.5; ox += 0.5) {
+        const block = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.06), conduitMat);
+        block.position.set(ox, 0, 0.07); g.add(block);
+      }
+      add(g);
+    };
+
+    const statusPanel = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.25, 0.06), darkMat);
+      body.position.z = 0.03; g.add(body);
+      const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.1), screenMat);
+      scr.position.set(0, 0.03, 0.06); g.add(scr);
+      for (let i = -1; i <= 1; i++) {
+        const led = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.01), i === 0 ? ledGreen : (i < 0 ? ledAmber : ledRed));
+        led.position.set(i * 0.08, -0.06, 0.06); g.add(led);
+      }
+      add(g);
+    };
+
+    const emergencyPanel = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.06), redMat);
+      body.position.z = 0.03; g.add(body);
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.04, 0.01), hazardMat);
+      stripe.position.set(0, 0.14, 0.06); g.add(stripe);
+      stripe.position.set(0, -0.14, 0.06); g.add(stripe.clone());
+      const btn = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), ledRed);
+      btn.position.set(0, 0, 0.08); btn.scale.set(1, 0.5, 1); g.add(btn);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.008, 6, 12), new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7, roughness: 0.3 }));
+      ring.position.set(0, 0, 0.08); ring.scale.set(1, 0.5, 1); g.add(ring);
+      add(g);
+    };
+
+    const junctionBox = (wall, x, y) => {
+      const g = wallPos(wall, x, y);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.1), darkMat);
+      body.position.z = 0.05; g.add(body);
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.04, 0.12), conduitMat);
+      cap.position.set(0, 0.12, 0.05); g.add(cap);
+      const l = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.01), ledAmber);
+      l.position.set(0, 0, 0.1); g.add(l);
+      add(g);
+    };
+
+    // North wall — z=8, x = -7,-5,-3,-1,1,3,5,7
+    powerBox('n', -7, 1.2);
+    conduit('n', -5, 1.2);
+    emergencyPanel('n', -3, 2.8);
+    statusPanel('n', -1, 1.2);
+    junctionBox('n', 1, 1.2);
+    powerBox('n', 3, 2.8);
+    statusPanel('n', 5, 1.2);
+    conduit('n', 7, 2.8);
+
+    // West wall — x=-8, z = -7,-5,-3,-1,1,3,5,7
+    conduit('w', -7, 1.2);
+    powerBox('w', -5, 2.8);
+    statusPanel('w', -3, 1.2);
+    emergencyPanel('w', -1, 1.2);
+    junctionBox('w', 1, 2.8);
+    powerBox('w', 3, 1.2);
+    conduit('w', 5, 1.2);
+    statusPanel('w', 7, 2.8);
+
+    // East wall — x=8, z = -7,-5,-3,-1,1,3,5,7
+    statusPanel('e', -7, 2.8);
+    powerBox('e', -5, 1.2);
+    conduit('e', -3, 1.2);
+    junctionBox('e', -1, 2.8);
+    powerBox('e', 1, 1.2);
+    conduit('e', 3, 2.8);
+    statusPanel('e', 5, 1.2);
+    emergencyPanel('e', 7, 1.2);
+
+    // South wall — z=-8, x = -7,-5,-3,3,5,7 (door gap at -1,1)
+    powerBox('s', -7, 1.2);
+    conduit('s', -5, 2.8);
+    statusPanel('s', -3, 1.2);
+    emergencyPanel('s', 3, 1.2);
+    powerBox('s', 5, 2.8);
+    statusPanel('s', 7, 1.2);
   }
 
   async _buildSciFiCorridor(scene) {
