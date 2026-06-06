@@ -385,6 +385,33 @@ html, body {
   gap: 0.75rem;
 }
 
+.mode-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+
+.mode-btn:hover {
+  border-color: #44ffaa;
+  color: #44ffaa;
+}
+
+.mode-btn.active {
+  background: rgba(68, 255, 170, 0.12);
+  border-color: #44ffaa;
+  color: #44ffaa;
+  box-shadow: 0 0 12px rgba(68, 255, 170, 0.3);
+}
+
 .diff-btn {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.75rem;
@@ -397,6 +424,7 @@ html, body {
   cursor: pointer;
   transition: all 0.2s;
   flex: 1;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
 }
 
 .diff-btn:hover {
