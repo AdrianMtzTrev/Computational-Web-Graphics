@@ -239,6 +239,22 @@ document.getElementById('btn-scores').addEventListener('click', function() {
 document.getElementById('btn-config-back').addEventListener('click', function() { showScreen('menu'); });
 document.getElementById('btn-scores-back').addEventListener('click', function() { showScreen('menu'); });
 
+// Social share buttons
+document.getElementById('btn-share-fb').addEventListener('click', function() {
+  var url = 'https://www.facebook.com/sharer/sharer.php?quote=' + encodeURIComponent('ESCAPÉ DE VOID STATION! 🚀 Juega en computational-web-graphics-production.up.railway.app') + '&u=' + encodeURIComponent(window.location.href);
+  window.open(url, 'facebook-share', 'width=600,height=500');
+});
+document.getElementById('btn-share-ig').addEventListener('click', function() {
+  var text = 'VOID STATION 🚀 - Escapa de la estación. Juega en computational-web-graphics-production.up.railway.app';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      alert('📋 Texto copiado — pégalo en Instagram!');
+    }).catch(function() {});
+  } else {
+    prompt('Copia este texto y compártelo:', text);
+  }
+});
+
 // Multiplayer navigation
 document.getElementById('btn-multiplayer').addEventListener('click', function() {
   showScreen('multiplayer');

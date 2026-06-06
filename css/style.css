@@ -186,6 +186,42 @@ html, body {
   transform: translateY(-2px);
 }
 
+.social-share {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.social-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+.btn-social {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 900;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--text-dim);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-social:hover {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+  transform: translateY(-1px);
+}
+
 .btn-back {
   background: transparent;
   color: var(--text-dim);
