@@ -175,21 +175,17 @@ export class BridgeRoom {
     const starTex = new THREE.CanvasTexture(starCanvas);
     starTex.needsUpdate = true;
 
-    [[-6, -2], [2, 6]].forEach(([fromX, toX]) => {
-      const width = toX - fromX;
-      const geo = new THREE.PlaneGeometry(width, 4);
+    [-5, -3, 3, 5].forEach(windowX => {
+      const geo = new THREE.PlaneGeometry(2.2, 4.4);
       const mat = new THREE.MeshBasicMaterial({
         map: starTex,
-        emissive: 0x4488ff,
-        emissiveIntensity: 0.3,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.85,
       });
       const mesh = new THREE.Mesh(geo, mat);
-      const cx = (fromX + toX) / 2;
-      mesh.position.set(cx, 2, 9.6);
-      mesh.rotation.y = Math.PI / 2;
+      mesh.position.set(windowX, 2, 9.6);
+      mesh.rotation.y = Math.PI;
       scene.add(mesh);
       this.objects.push(mesh);
     });
@@ -530,7 +526,7 @@ export class BridgeRoom {
     this.audioLoader.load('assets/sound/bridge_ambient.wav', buffer => {
       this._ambientAudio.setBuffer(buffer);
       this._ambientAudio.setLoop(true);
-      this._ambientAudio.setVolume(0.25);
+      this._ambientAudio.setVolume(0.5);
       this._ambientAudio.play();
     }, undefined, err => {
       console.warn('Failed to load bridge ambient audio:', err);
