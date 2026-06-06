@@ -22,6 +22,10 @@ export class BridgeRoom {
     this.moltenLoader.setPath('assets/models/molten-maps/');
     this.stationLoader = new GLTFLoader();
     this.stationLoader.setPath('assets/kenney_space-station-kit/Models/GLB format/');
+    this.audioLoader = new THREE.AudioLoader();
+    this._ambientAudio = null;
+    this._onPause = null;
+    this._onResume = null;
   }
 
   _loadSciFi(name) {
@@ -54,6 +58,7 @@ export class BridgeRoom {
     this._buildPickupItems(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
+    this._setupAudio(scene);
     this._setupColliders();
 
     this._rebuildInteractiveObjects();
@@ -510,6 +515,33 @@ export class BridgeRoom {
     this.objects.push(this.particles);
   }
 
+  _setupAudio(scene) {
+    const camera = window.__game?.camera;
+    if (!camera) return;
+
+    let listener = camera.userData._audioListener;
+    if (!listener) {
+      listener = new THREE.AudioListener();
+      camera.add(listener);
+      camera.userData._audioListener = listener;
+    }
+
+    this._ambientAudio = new THREE.Audio(listener);
+    this.audioLoader.load('assets/sound/bridge_ambient.wav', buffer => {
+      this._ambientAudio.setBuffer(buffer);
+      this._ambientAudio.setLoop(true);
+      this._ambientAudio.setVolume(0.25);
+      this._ambientAudio.play();
+    }, undefined, err => {
+      console.warn('Failed to load bridge ambient audio:', err);
+    });
+
+    this._onPause = () => { if (this._ambientAudio) this._ambientAudio.pause(); };
+    this._onResume = () => { if (this._ambientAudio) this._ambientAudio.play(); };
+    window.addEventListener('game-pause', this._onPause);
+    window.addEventListener('game-resume', this._onResume);
+  }
+
   _setupColliders() {
     this.colliders = [
       // West wall
@@ -623,6 +655,12 @@ export class BridgeRoom {
     this._holoSphere = null;
     this._holoRing1 = null;
     this._holoRing2 = null;
+    if (this._onPause) window.removeEventListener('game-pause', this._onPause);
+    if (this._onResume) window.removeEventListener('game-resume', this._onResume);
+    if (this._ambientAudio) {
+      this._ambientAudio.stop();
+      this._ambientAudio = null;
+    }
   }
 
   _rebuildInteractiveObjects() {
