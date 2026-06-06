@@ -9,7 +9,7 @@ let _playerCount = 0;
 export function connect(serverUrl) {
   return new Promise((resolve) => {
     import('socket.io-client').then(({ io }) => {
-      socket = io(serverUrl || 'https://voidstation-server.railway.app');
+      socket = io(serverUrl || 'https://computational-web-graphics-production.up.railway.app');
 
       socket.on('connect', () => {
         connected = true;

@@ -133,7 +133,7 @@ window.addEventListener('game-win', function() {
       time_secs: Math.floor(window.__game.clock.elapsedTime || 0),
       room: 'bridge',
     };
-    fetch('https://voidstation-server.railway.app/api/scores', {
+    fetch('https://computational-web-graphics-production.up.railway.app/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(scoreData),
@@ -210,7 +210,7 @@ document.getElementById('btn-continue').addEventListener('click', continueGame);
 document.getElementById('btn-config').addEventListener('click', function() { showScreen('config'); });
 document.getElementById('btn-scores').addEventListener('click', function() {
   showScreen('scores');
-  fetch('https://voidstation-server.railway.app/api/scores')
+  fetch('https://computational-web-graphics-production.up.railway.app/api/scores')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var tbody = document.getElementById('scores-body');

@@ -153,7 +153,7 @@ export class EngineRoom {
     ]);
 
     const setup = (obj, color) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(color || 0x8899aa); }); } } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(color || 0x887755); }); } } });
     };
 
     const place = (model, x, z, ry, y = 1) => {

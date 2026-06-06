@@ -122,16 +122,16 @@ export class BridgeRoom {
       this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_001+_V2.0/Pack_SciFi_A_001_V2.0/02_EXPORT/OBJ/SM_Wall_V0.glb'),
     ]);
 
-    const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
+    const setup = (obj, color) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(color || 0x445566); }); } } });
     };
 
-    const place = (model, x, z, ry, y = 1) => {
+    const place = (model, x, z, ry, y = 1, color) => {
       if (!model) return;
       const c = model.clone();
       c.position.set(x, y, z);
       c.rotation.y = ry;
-      setup(c);
+      setup(c, color);
       scene.add(c);
       this.objects.push(c);
     };
@@ -144,7 +144,7 @@ export class BridgeRoom {
     // North wall — skip window positions
     xs.forEach(x => {
       if (windowPos.has(x)) return;
-      if (w) { place(w, x, 10, Math.PI / 2, 1); place(w, x, 10, Math.PI / 2, 3); }
+      if (w) { place(w, x, 10, Math.PI / 2, 1, 0x556677); place(w, x, 10, Math.PI / 2, 3, 0x556677); }
     });
 
     // South wall — skip door gap
