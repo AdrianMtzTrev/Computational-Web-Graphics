@@ -6,10 +6,18 @@ let otherPlayers = {};
 let _roomCode = '';
 let _playerCount = 0;
 
+function getDefaultServer() {
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1' || host === '') {
+    return 'http://localhost:3000';
+  }
+  return 'https://computational-web-graphics-production.up.railway.app';
+}
+
 export function connect(serverUrl) {
   return new Promise((resolve) => {
     import('socket.io-client').then(({ io }) => {
-      socket = io(serverUrl || 'https://computational-web-graphics-production.up.railway.app');
+      socket = io(serverUrl || getDefaultServer());
 
       socket.on('connect', () => {
         connected = true;
