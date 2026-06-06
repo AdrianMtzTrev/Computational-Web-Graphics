@@ -118,7 +118,23 @@ window.addEventListener('game-pause', function() {
 window.addEventListener('game-win', function() {
   var hud = document.getElementById('game-hud');
   if (hud) hud.style.display = 'none';
-  if (window.__game) window.__game.clearSave();
+  if (window.__game) {
+    window.__game.clearSave();
+    // Submit score to API
+    var scoreData = {
+      username: 'PLAYER_' + Math.floor(Math.random() * 9000 + 1000),
+      score: 1000,
+      mode: window.__game.mode || 'story',
+      difficulty: window.__game.difficulty || 'easy',
+      time_secs: Math.floor(window.__game.clock.elapsedTime || 0),
+      room: 'bridge',
+    };
+    fetch('https://voidstation-server.railway.app/api/scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(scoreData),
+    }).catch(function() { /* offline — ignore */ });
+  }
   showScreen('win');
 });
 
@@ -134,6 +150,18 @@ document.getElementById('btn-death-menu').addEventListener('click', exitToMenu);
 
 document.getElementById('btn-win-restart').addEventListener('click', startGame);
 document.getElementById('btn-win-menu').addEventListener('click', exitToMenu);
+document.getElementById('btn-win-share').addEventListener('click', function() {
+  var text = 'ESCAPÉ DE VOID STATION! 🚀\nCompleta la misión en voidstation.space';
+  if (navigator.share) {
+    navigator.share({ title: 'VOID STATION', text: text, url: window.location.href }).catch(function() {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      alert('Copiado al portapapeles — comparte tu logro!');
+    }).catch(function() {});
+  } else {
+    prompt('Copia este texto:', text);
+  }
+});
 
 var sliders = [
   { slider: 'volume-master', display: 'volume-master-val' },
@@ -168,7 +196,25 @@ modeBtns.forEach(function(btn) {
 document.getElementById('btn-play').addEventListener('click', startGame);
 document.getElementById('btn-continue').addEventListener('click', continueGame);
 document.getElementById('btn-config').addEventListener('click', function() { showScreen('config'); });
-document.getElementById('btn-scores').addEventListener('click', function() { showScreen('scores'); });
+document.getElementById('btn-scores').addEventListener('click', function() {
+  showScreen('scores');
+  fetch('https://voidstation-server.railway.app/api/scores')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var tbody = document.getElementById('scores-body');
+      if (!tbody || !data.length) return;
+      tbody.innerHTML = '';
+      data.forEach(function(row, i) {
+        var tr = document.createElement('tr');
+        if (i === 0) tr.className = 'score-gold';
+        tr.innerHTML = '<td>' + String(i + 1).padStart(2, '0') + '</td>' +
+          '<td>' + (row.username || 'ANON') + '</td>' +
+          '<td>' + (row.score || 0).toLocaleString() + '</td>' +
+          '<td>' + (row.time_secs ? Math.floor(row.time_secs / 60) + ':' + String(row.time_secs % 60).padStart(2, '0') : '--:--') + '</td>';
+        tbody.appendChild(tr);
+      });
+    }).catch(function() {});
+});
 
 document.getElementById('btn-config-back').addEventListener('click', function() { showScreen('menu'); });
 document.getElementById('btn-scores-back').addEventListener('click', function() { showScreen('menu'); });
