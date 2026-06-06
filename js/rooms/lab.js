@@ -56,7 +56,7 @@ export class LabRoom {
     const gate = await this._loadModular('gate-lasers.glb');
     this.gateLasers = gate;
     this.gateLasers.position.set(0, 0, -10.2);
-    this.gateLasers.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    this.gateLasers.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     scene.add(this.gateLasers);
     this.objects.push(this.gateLasers);
 
@@ -119,7 +119,7 @@ export class LabRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const cloneAt = (model, x, z, ry = 0, y = 0) => {
@@ -170,7 +170,7 @@ export class LabRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const place = (model, x, z, ry, y = 1) => {
@@ -242,7 +242,7 @@ export class LabRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const place = (model, x, z, ry, y = 1.5) => {
@@ -604,6 +604,10 @@ export class LabRoom {
   }
 
   _setupLights(scene) {
+    const hemi = new THREE.HemisphereLight(0x88aaff, 0x444422, 1.5);
+    scene.add(hemi);
+    this.lights.push(hemi);
+
     const ambient = new THREE.AmbientLight(0xccddff, 2.0);
     scene.add(ambient);
     this.lights.push(ambient);

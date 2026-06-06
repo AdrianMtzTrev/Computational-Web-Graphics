@@ -102,7 +102,7 @@ export class EngineRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const cloneAt = (model, x, z, ry = 0, y = 0) => {
@@ -152,8 +152,8 @@ export class EngineRoom {
       this._loadSciFi('Pack_SciFi_Series_A_Bundle/Pack_SciFi_A_002_V1.0/02_EXPORT/OBJ/SM_Door_Single_V1.glb'),
     ]);
 
-    const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    const setup = (obj, color) => {
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(color || 0x8899aa); }); } } });
     };
 
     const place = (model, x, z, ry, y = 1) => {
@@ -344,7 +344,7 @@ export class EngineRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const place = (model, x, z, ry, y = 1) => {
@@ -708,6 +708,10 @@ export class EngineRoom {
   }
 
   _setupLights(scene) {
+    const hemi = new THREE.HemisphereLight(0x88aaff, 0x444422, 1.5);
+    scene.add(hemi);
+    this.lights.push(hemi);
+
     const ambient = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambient);
     this.lights.push(ambient);

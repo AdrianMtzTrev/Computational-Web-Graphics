@@ -77,7 +77,7 @@ export class BridgeRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const cloneAt = (model, x, z, ry = 0, y = 0) => {
@@ -121,7 +121,7 @@ export class BridgeRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const place = (model, x, z, ry, y = 1) => {
@@ -358,7 +358,7 @@ export class BridgeRoom {
     ]);
 
     const setup = (obj) => {
-      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => { if (m.color && !m.map) m.color.setHex(0x556677); }); } } });
     };
 
     const place = (model, x, z, ry) => {
@@ -572,6 +572,10 @@ export class BridgeRoom {
   }
 
   _setupLights(scene) {
+    const hemi = new THREE.HemisphereLight(0x88aaff, 0x444422, 1.5);
+    scene.add(hemi);
+    this.lights.push(hemi);
+
     const ambient = new THREE.AmbientLight(0x3366cc, 1.5);
     scene.add(ambient);
     this.lights.push(ambient);

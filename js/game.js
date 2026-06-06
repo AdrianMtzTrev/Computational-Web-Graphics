@@ -61,6 +61,7 @@ export class Game {
         }
       `,
       fragmentShader: `
+        uniform sampler2D tDiffuse;
         uniform float offset;
         uniform float darkness;
         varying vec2 vUv;
