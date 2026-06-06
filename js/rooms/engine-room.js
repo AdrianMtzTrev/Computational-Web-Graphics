@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SecurityDrone } from '../enemies.js';
 
 export class EngineRoom {
   constructor() {
@@ -30,6 +31,7 @@ export class EngineRoom {
     this.sciFiLoader = new GLTFLoader();
     this.audioLoader = new THREE.AudioLoader();
     this._ambientAudio = null;
+    this._drones = [];
   }
 
   async load(scene) {
@@ -58,6 +60,7 @@ export class EngineRoom {
     this._buildWallDecor(scene);
     this._buildPickupItems(scene);
     this._setupAudio(scene);
+    this._setupDrones(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
     this._setupColliders();
@@ -810,6 +813,15 @@ export class EngineRoom {
     this._sparkLifetimes[i] = Math.random() * 0.5 + 0.3;
   }
 
+  _setupDrones(scene) {
+    const wp = [[-2, 1.5, 4], [2, 1.5, 4], [2, 1.5, -3], [-2, 1.5, -3]];
+    const drone = new SecurityDrone(wp, 0, 1.2);
+    drone.setPosition(-2, 1.5, 4);
+    scene.add(drone.group);
+    this.objects.push(drone.group);
+    this._drones.push(drone);
+  }
+
   _setupAudio(scene) {
     const camera = window.__game?.camera;
     if (!camera) return;
@@ -912,6 +924,12 @@ export class EngineRoom {
       this.particles.geometry.attributes.position.needsUpdate = true;
     }
 
+    this._drones.forEach(d => {
+      if (window.__game?.player) {
+        d.update(delta, window.__game.player.camera.position);
+      }
+    });
+
     // Animate sparks
     if (this._sparkParticles) {
       const sparkPos = this._sparkParticles.geometry.attributes.position.array;
@@ -972,5 +990,6 @@ export class EngineRoom {
     this._sparkParticles = null;
     this._sparkVelocities = [];
     this._sparkLifetimes = null;
+    this._drones = [];
   }
 }
