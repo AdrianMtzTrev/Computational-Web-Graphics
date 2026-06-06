@@ -30,7 +30,7 @@ export class LabRoom {
 
     this.modularLoader = new GLTFLoader();
     this.modularLoader.setPath('assets/models/modular-space-kit/');
-    this.modularLoader.setResourcePath('assets/models/modular-space-kit/Textures/');
+    this.modularLoader.setResourcePath('assets/models/modular-space-kit/');
 
     this.stationLoader = new GLTFLoader();
     this.stationLoader.setPath('assets/kenney_space-station-kit/Models/GLB format/');

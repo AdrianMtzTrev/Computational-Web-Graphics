@@ -24,7 +24,7 @@ export class EngineRoom {
     ];
     this.loader = new GLTFLoader();
     this.loader.setPath('assets/models/modular-space-kit/');
-    this.loader.setResourcePath('assets/models/modular-space-kit/Textures/');
+    this.loader.setResourcePath('assets/models/modular-space-kit/');
 
     this.moltenLoader = new GLTFLoader();
     this.moltenLoader.setPath('assets/models/molten-maps/');
@@ -781,7 +781,17 @@ export class EngineRoom {
     this._sparkVelocities = [];
     this._sparkLifetimes = new Float32Array(sparkCount);
     for (let i = 0; i < sparkCount; i++) {
-      this._resetSpark(i);
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 3.0 + 0.5;
+      sparkPos[i * 3] = Math.cos(angle) * radius;
+      sparkPos[i * 3 + 1] = 2.5 + Math.random() * 1.2;
+      sparkPos[i * 3 + 2] = Math.sin(angle) * radius;
+      this._sparkVelocities.push({
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: -(Math.random() * 1.2 + 0.6),
+        vz: (Math.random() - 0.5) * 0.5,
+      });
+      this._sparkLifetimes[i] = Math.random() * 0.5 + 0.3;
     }
     const sparkGeo = new THREE.BufferGeometry();
     sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
