@@ -28,6 +28,8 @@ export class EngineRoom {
     this.moltenLoader = new GLTFLoader();
     this.moltenLoader.setPath('assets/models/molten-maps/');
     this.sciFiLoader = new GLTFLoader();
+    this.audioLoader = new THREE.AudioLoader();
+    this._ambientAudio = null;
   }
 
   async load(scene) {
@@ -55,6 +57,7 @@ export class EngineRoom {
     this._buildPipes(scene);
     this._buildWallDecor(scene);
     this._buildPickupItems(scene);
+    this._setupAudio(scene);
     this._setupLights(scene);
     this._setupParticles(scene);
     this._setupColliders();
@@ -763,6 +766,28 @@ export class EngineRoom {
     this.objects.push(this.particles);
   }
 
+  _setupAudio(scene) {
+    const camera = window.__game?.camera;
+    if (!camera) return;
+
+    let listener = camera.userData._audioListener;
+    if (!listener) {
+      listener = new THREE.AudioListener();
+      camera.add(listener);
+      camera.userData._audioListener = listener;
+    }
+
+    this._ambientAudio = new THREE.Audio(listener);
+    this.audioLoader.load('assets/sound/engine_ambient.wav', buffer => {
+      this._ambientAudio.setBuffer(buffer);
+      this._ambientAudio.setLoop(true);
+      this._ambientAudio.setVolume(0.3);
+      this._ambientAudio.play();
+    }, undefined, err => {
+      console.warn('Failed to load engine ambient audio:', err);
+    });
+  }
+
   _setupColliders() {
     this._colliderBoxes = [
       // Main room walls (16×16, walls at ±8)
@@ -858,6 +883,10 @@ export class EngineRoom {
     this.lights.forEach(light => {
       if (light.parent) light.parent.remove(light);
     });
+    if (this._ambientAudio) {
+      this._ambientAudio.stop();
+      this._ambientAudio = null;
+    }
     this.objects = [];
     this.lights = [];
     this.flickerLights = [];
