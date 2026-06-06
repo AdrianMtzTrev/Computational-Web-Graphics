@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SecurityDrone } from '../enemies.js';
 
 export class LabRoom {
   constructor() {
@@ -80,6 +81,7 @@ export class LabRoom {
     this._setupAudio(scene);
     this._setupColliders();
 
+    this._setupDrones(scene);
     this._rebuildInteractiveObjects();
     if (window.__game?.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
@@ -690,6 +692,16 @@ export class LabRoom {
     this.objects.push(this._bubbleParticles);
   }
 
+  _setupDrones(scene) {
+    const wp = [[-2, 1.5, 2], [2, 1.5, 2], [2, 1.5, -2], [-2, 1.5, -2]];
+    const diff = window.__game?.difficulty || 'easy';
+    const drone = new SecurityDrone(wp, 0, diff);
+    drone.setPosition(-2, 1.5, 2);
+    scene.add(drone.group);
+    this.objects.push(drone.group);
+    this._drones.push(drone);
+  }
+
   _setupAudio(scene) {
     const camera = window.__game?.camera;
     if (!camera) return;
@@ -800,6 +812,12 @@ export class LabRoom {
       this.particles.geometry.attributes.position.needsUpdate = true;
     }
 
+    this._drones.forEach(d => {
+      if (window.__game?.player) {
+        d.update(delta, window.__game.player.camera.position);
+      }
+    });
+
     if (this._bubbleParticles) {
       const bPos = this._bubbleParticles.geometry.attributes.position.array;
       const containerPositions = [
@@ -857,6 +875,7 @@ export class LabRoom {
     this._transitionCallback = null;
     this._transitionTriggered = false;
     this._bubbleParticles = null;
+    this._drones = [];
     this._bubbleVelocities = [];
     if (this._onPause) window.removeEventListener('game-pause', this._onPause);
     if (this._onResume) window.removeEventListener('game-resume', this._onResume);

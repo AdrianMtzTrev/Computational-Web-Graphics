@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SecurityDrone } from '../enemies.js';
 
 export class BridgeRoom {
   constructor() {
@@ -62,6 +63,7 @@ export class BridgeRoom {
     this._setupAudio(scene);
     this._setupColliders();
 
+    this._setupDrones(scene);
     this._rebuildInteractiveObjects();
     if (window.__game?.player) {
       window.__game.player.setInteractiveObjects(this.interactiveObjects);
@@ -595,6 +597,16 @@ export class BridgeRoom {
     this.lights.push(warm);
   }
 
+  _setupDrones(scene) {
+    const wp = [[-3, 1.5, 0], [3, 1.5, 0], [3, 1.5, -4], [-3, 1.5, -4]];
+    const diff = window.__game?.difficulty || 'easy';
+    const drone = new SecurityDrone(wp, 0, diff);
+    drone.setPosition(-3, 1.5, 0);
+    scene.add(drone.group);
+    this.objects.push(drone.group);
+    this._drones.push(drone);
+  }
+
   _setupParticles(scene) {
     const count = 400;
     const positions = new Float32Array(count * 3);
@@ -760,6 +772,12 @@ export class BridgeRoom {
       this.particles.geometry.attributes.position.needsUpdate = true;
     }
 
+    this._drones.forEach(d => {
+      if (window.__game?.player) {
+        d.update(delta, window.__game.player.camera.position);
+      }
+    });
+
     if (this._dataParticles) {
       const dPos = this._dataParticles.geometry.attributes.position.array;
       for (let i = 0; i < 150; i++) {
@@ -822,6 +840,7 @@ export class BridgeRoom {
     this._puzzleSolved = false;
     this._dataParticles = null;
     this._dataVelocities = [];
+    this._drones = [];
     this._holoSphere = null;
     this._holoRing1 = null;
     this._holoRing2 = null;
