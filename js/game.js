@@ -137,6 +137,7 @@ export class Game {
 
     this.isPaused = false;
     this.clock.start();
+    window.dispatchEvent(new CustomEvent('game-resume'));
     this.controls.lock();
 
     const onLock = () => {

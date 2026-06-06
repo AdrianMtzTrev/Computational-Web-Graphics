@@ -786,6 +786,11 @@ export class EngineRoom {
     }, undefined, err => {
       console.warn('Failed to load engine ambient audio:', err);
     });
+
+    this._onPause = () => { if (this._ambientAudio) this._ambientAudio.pause(); };
+    this._onResume = () => { if (this._ambientAudio) this._ambientAudio.play(); };
+    window.addEventListener('game-pause', this._onPause);
+    window.addEventListener('game-resume', this._onResume);
   }
 
   _setupColliders() {
@@ -883,6 +888,8 @@ export class EngineRoom {
     this.lights.forEach(light => {
       if (light.parent) light.parent.remove(light);
     });
+    if (this._onPause) window.removeEventListener('game-pause', this._onPause);
+    if (this._onResume) window.removeEventListener('game-resume', this._onResume);
     if (this._ambientAudio) {
       this._ambientAudio.stop();
       this._ambientAudio = null;
