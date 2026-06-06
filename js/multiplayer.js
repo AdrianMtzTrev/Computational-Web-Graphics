@@ -21,47 +21,46 @@ function createPlayerMesh() {
   const darkMat = new THREE.MeshPhongMaterial({ color: 0x1a2a3a });
   const visorMat = new THREE.MeshPhongMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.5 });
 
+  // Legs (bottom at y=0)
+  const legMat = new THREE.MeshPhongMaterial({ color: 0x0f1f2f });
+  const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.3, 6), legMat);
+  legL.position.set(-0.1, 0.15, 0);
+  group.add(legL);
+
+  const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.3, 6), legMat);
+  legR.position.set(0.1, 0.15, 0);
+  group.add(legR);
+
   // Torso
   const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.6, 8), bodyMat);
-  torso.position.y = 0.95;
+  torso.position.y = 0.6;
   group.add(torso);
+
+  // Arms
+  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4, 6), bodyMat);
+  armL.position.set(-0.28, 0.6, 0);
+  armL.rotation.z = 0.15;
+  group.add(armL);
+
+  const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4, 6), bodyMat);
+  armR.position.set(0.28, 0.6, 0);
+  armR.rotation.z = -0.15;
+  group.add(armR);
 
   // Head
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), darkMat);
-  head.position.y = 1.35;
+  head.position.y = 1.05;
   group.add(head);
 
   // Visor
   const visor = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.04), visorMat);
-  visor.position.set(0, 1.33, 0.14);
+  visor.position.set(0, 1.03, 0.14);
   group.add(visor);
-
-  // Left arm
-  const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4, 6), bodyMat);
-  armL.position.set(-0.28, 0.95, 0);
-  armL.rotation.z = 0.15;
-  group.add(armL);
-
-  // Right arm
-  const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4, 6), bodyMat);
-  armR.position.set(0.28, 0.95, 0);
-  armR.rotation.z = -0.15;
-  group.add(armR);
-
-  // Legs
-  const legMat = new THREE.MeshPhongMaterial({ color: 0x0f1f2f });
-  const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.3, 6), legMat);
-  legL.position.set(-0.1, 0.45, 0);
-  group.add(legL);
-
-  const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.3, 6), legMat);
-  legR.position.set(0.1, 0.45, 0);
-  group.add(legR);
 
   // Glow ring at feet
   const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.3 });
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.12, 0.18, 16), ringMat);
-  ring.position.y = 0.02;
+  ring.position.y = 0.01;
   ring.rotation.x = -Math.PI / 2;
   group.add(ring);
 

@@ -411,7 +411,7 @@ export class Game {
         if (now - this._lastSyncTime > 50) {
           this._lastSyncTime = now;
           syncMove(
-            { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
+            { x: this.camera.position.x, y: this.player.feetY, z: this.camera.position.z },
             { x: 0, y: this.camera.rotation.y, z: 0 },
             getRoomCode()
           );
