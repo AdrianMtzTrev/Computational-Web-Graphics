@@ -435,10 +435,10 @@ export class EngineRoom {
     scene.add(group);
     this.objects.push(group);
 
-    const reactorLight = new THREE.PointLight(0xff4400, 0.8, 8);
+    const reactorLight = new THREE.PointLight(0xff4400, 2.5, 12);
     reactorLight.position.set(0, 1.2, 0.5);
     scene.add(reactorLight);
-    this.flickerLights.push({ light: reactorLight, baseIntensity: 1.5, speed: 4, amplitude: 0.6 });
+    this.flickerLights.push({ light: reactorLight, baseIntensity: 2.5, speed: 4, amplitude: 0.6 });
     this.lights.push(reactorLight);
   }
 
@@ -708,31 +708,31 @@ export class EngineRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambient = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambient);
     this.lights.push(ambient);
 
     for (let i = 0; i < 4; i++) {
       const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
       const r = 3.0;
-      const emLight = new THREE.PointLight(0xff4400, 0.5, 12);
+      const emLight = new THREE.PointLight(0xff4400, 1.5, 18);
       emLight.position.set(Math.cos(angle) * r, 1.6, Math.sin(angle) * r);
       scene.add(emLight);
       this.flickerLights.push({
         light: emLight,
-        baseIntensity: 0.5,
+        baseIntensity: 1.5,
         speed: 2.5 + Math.random() * 2,
         amplitude: 0.3,
       });
       this.lights.push(emLight);
     }
 
-    const dimCeiling = new THREE.PointLight(0xffffff, 0.15, 20);
+    const dimCeiling = new THREE.PointLight(0xffffff, 0.6, 25);
     dimCeiling.position.set(0, 2.2, 0);
     scene.add(dimCeiling);
     this.flickerLights.push({
       light: dimCeiling,
-      baseIntensity: 0.15,
+      baseIntensity: 0.6,
       speed: 1.5,
       amplitude: 0.12,
     });

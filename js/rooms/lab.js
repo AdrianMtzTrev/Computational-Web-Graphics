@@ -604,13 +604,13 @@ export class LabRoom {
   }
 
   _setupLights(scene) {
-    const ambient = new THREE.AmbientLight(0xccddff, 0.7);
+    const ambient = new THREE.AmbientLight(0xccddff, 2.0);
     scene.add(ambient);
     this.lights.push(ambient);
 
     const positions = [[-6, 4.0, -6], [6, 4.0, -6], [-6, 4.0, 6], [6, 4.0, 6], [0, 4.0, 0]];
     positions.forEach(p => {
-      const light = new THREE.PointLight(0xccddff, 1.2, 14);
+      const light = new THREE.PointLight(0xccddff, 2.5, 20);
       light.position.set(p[0], p[1], p[2]);
       scene.add(light);
       this.lights.push(light);
