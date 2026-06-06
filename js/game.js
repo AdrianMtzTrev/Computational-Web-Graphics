@@ -11,7 +11,7 @@ import { SceneManager } from './scene-manager.js';
 import { EngineRoom } from './rooms/engine-room.js';
 import { LabRoom } from './rooms/lab.js';
 import { BridgeRoom } from './rooms/bridge.js';
-import { syncMove, isConnected } from './multiplayer.js';
+import { syncMove, isConnected, getOtherPlayers } from './multiplayer.js';
 
 export class Game {
   constructor(mode = 'story', difficulty = 'easy') {
@@ -207,6 +207,14 @@ export class Game {
     }
 
     document.getElementById('loading-screen').classList.remove('active');
+
+    // Attach any orphaned multiplayer meshes to the scene
+    if (this._isMultiplayer) {
+      const players = getOtherPlayers();
+      Object.values(players).forEach(p => {
+        if (!p.mesh.parent) this.scene.add(p.mesh);
+      });
+    }
 
     this.controls.lock();
 
