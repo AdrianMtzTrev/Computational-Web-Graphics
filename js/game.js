@@ -394,14 +394,12 @@ export class Game {
       this.hud.update(this.player);
       this.composer.render();
 
-      if (this.mode === 'nodamage') {
-        if (this.player.feetY < -10) this.player.health = 0;
-        if (this.player.health <= 0 && !this._deathTriggered) {
-          this._deathTriggered = true;
-          this.isPaused = true;
-          this.controls.unlock();
-          window.dispatchEvent(new CustomEvent('game-death'));
-        }
+      if (this.player.feetY < -10) this.player.health = 0;
+      if (this.player.health <= 0 && !this._deathTriggered) {
+        this._deathTriggered = true;
+        this.isPaused = true;
+        this.controls.unlock();
+        window.dispatchEvent(new CustomEvent('game-death'));
       }
     }
   }

@@ -25,17 +25,11 @@ async function initDb() {
   if (hasMysql) {
     const exists = await db.schema.hasTable('scores');
     if (!exists) {
-      await db.schema.createTable('users', t => {
-        t.increments('id');
-        t.string('username', 32).notNullable().unique();
-        t.string('password', 255).notNullable();
-        t.timestamp('created_at').defaultTo(db.fn.now());
-      });
       await db.schema.createTable('scores', t => {
         t.increments('id');
-        t.integer('user_id').unsigned().notNullable().references('id').inTable('users');
+        t.string('username', 32).notNullable();
         t.integer('score').notNullable().defaultTo(0);
-        t.enu('mode', ['story', 'nodamage']).notNullable();
+        t.string('mode', 32).notNullable();
         t.string('difficulty', 16);
         t.integer('time_secs').notNullable().defaultTo(0);
         t.string('room', 32);

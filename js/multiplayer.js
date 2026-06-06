@@ -33,6 +33,7 @@ export function connect(serverUrl) {
       socket.on('sync-move', (data) => {
         if (otherPlayers[data.id]) {
           otherPlayers[data.id].pos.set(data.pos.x, data.pos.y, data.pos.z);
+          otherPlayers[data.id].mesh.position.copy(otherPlayers[data.id].pos);
         }
       });
 
