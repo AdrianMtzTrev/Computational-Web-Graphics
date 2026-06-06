@@ -66,7 +66,7 @@ export class Game {
         uniform float darkness;
         varying vec2 vUv;
         void main() {
-          vec4 texel = texture2D(tDiffuse, vUv);
+          vec4 texel = texture(tDiffuse, vUv);
           vec2 uv = (vUv - vec2(0.5)) * vec2(offset);
           gl_FragColor = vec4(mix(texel.rgb, vec3(0.0), dot(uv, uv) * darkness), texel.a);
         }
