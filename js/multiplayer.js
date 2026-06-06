@@ -64,6 +64,7 @@ function createPlayerMesh() {
   ring.rotation.x = -Math.PI / 2;
   group.add(ring);
 
+  group.scale.set(1.5, 1.5, 1.5);
   group.userData.isPlayer = true;
   return group;
 }
