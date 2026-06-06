@@ -22,7 +22,6 @@ export class BridgeRoom {
     this.moltenLoader.setPath('assets/models/molten-maps/');
     this.stationLoader = new GLTFLoader();
     this.stationLoader.setPath('assets/kenney_space-station-kit/Models/GLB format/');
-    this.stationLoader.setResourcePath('assets/kenney_space-station-kit/Models/GLB format/Textures/');
   }
 
   _loadSciFi(name) {

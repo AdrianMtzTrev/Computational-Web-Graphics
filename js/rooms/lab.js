@@ -34,7 +34,6 @@ export class LabRoom {
 
     this.stationLoader = new GLTFLoader();
     this.stationLoader.setPath('assets/kenney_space-station-kit/Models/GLB format/');
-    this.stationLoader.setResourcePath('assets/kenney_space-station-kit/Models/GLB format/Textures/');
 
     this.moltenLoader = new GLTFLoader();
     this.moltenLoader.setPath('assets/models/molten-maps/');
